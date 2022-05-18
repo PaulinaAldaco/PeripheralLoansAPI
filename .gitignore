@@ -1,0 +1,6 @@
+# Dependencias
+node_modules/
+
+# Credentials
+.env
+DigiCertGlobalRootCA.arm
