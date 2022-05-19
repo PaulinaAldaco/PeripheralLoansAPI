@@ -193,24 +193,125 @@ app.post('/newRequest', function(request, response){
             return response.json({success:-1, message:err});
         } else {
             var params = request.body['request_params']
-            for (p in params) {
-                var q = "INSERT INTO QGJ93840.REQUEST"
-                 +" VALUES (DEFAULT, '" + p['user_id'] + "'," + p['device_id'] 
-                + ", DEFAULT, DEFAULT)";
-                console.log(q);
-                conn.query(q, function (err, data) {
-                    if (err){
-                        console.log(err);
-                        return response.json({success:-2, message:err});
-                    }
-                    else{
-                        conn.close(function () {
-                            console.log('done');
-                            return response.json({success:1, message:'Data entered!'});
-                        });
-                    }
-                });
+            console.log(params)
+            
+            // Build queries
+            request_query = "INSERT INTO QGJ93840.REQUESTS VALUES"
+            device_query = ""
+            for (let i = 0; i < params.length-1; i++) {
+                var request_query = 
+                        request_query + "(DEFAULT, " + params[i]['user_id'] + "," +
+                        params[i]['device_id'] +
+                        ", DEFAULT, DEFAULT),";
+                var device_query = 
+                    device_query +
+                    "UPDATE QGJ93840.DEVICES SET " + '"device_state"' + " = 'Requested' WHERE id = " +
+                    params[i]['device_id'] + "; "
             }
+            var request_query = 
+                    request_query + "(DEFAULT, " + params[params.length-1]['user_id'] + "," +
+                    params[params.length-1]['device_id'] +
+                    ", DEFAULT, DEFAULT);";
+            var device_query = 
+                device_query +
+                "UPDATE QGJ93840.DEVICES SET " + '"device_state"' + " = 'Requested' WHERE id = " +
+                params[params.length-1]['device_id'] + "; "
+            console.log(request_query);
+            console.log(device_query);
+
+            // Create device requests
+            conn.query(request_query, function (err, data) {
+                if (err){
+                    console.log(err);
+                    return response.json({success:-2, message:err});
+                }
+                else{
+                    conn.close(function () {
+                        console.log('done');
+                        //return response.json({success:1, message:'Data entered!'});
+                    });
+                }
+            });
+
+            // Update device states
+            conn.query(device_query, function (err, data) {
+                if (err){
+                    console.log(err);
+                    return response.json({success:-2, message:err});
+                }
+                else{
+                    conn.close(function () {
+                        console.log('done');
+                        return response.json({success:1, message:'Data entered and updated!'});
+                    });
+                }
+            });
         }
     });
 });
+
+app.post('/checkDeviceAvailability', function(request, response){
+    ibmdb.open(cn, async function (err,conn) {
+        console.log("posting")
+        if (err){
+            console.log(err)
+            return response.json({success:-1, message:err});
+        } else {
+            var params = request.body['request_params']
+            console.log(params)
+            
+            // Build query
+            q = 'SELECT "ID","device_state" FROM QGJ93840.DEVICES WHERE "ID" IN ('
+            for (let i = 0; i < params.length-1; i++) {
+                var q = q + params[i]['device_id'] + ",";
+            }
+            var q = q + params[params.length-1]['device_id'] + ");";
+
+            console.log(q);
+
+            conn.query(q, function (err, data) {
+                if (err){
+                    console.log(err);
+                    return response.json({success:-2, message:err});
+                }
+                else{
+                    conn.close(function () {
+                        console.log('done');
+                        console.log(data)
+                        var avail = []
+                        var unavail = []
+                        for (let i = 0; i < params.length; i++) {
+                            if (data[i]["device_state"] == "Available") {
+                                avail.push(data[i]["ID"])
+                            }
+                            else {
+                                unavail.push(data[i]["ID"])
+                            }
+                        }
+                        res = {
+                            "available": avail,
+                            "unavailable": unavail
+                        }
+                        console.log(res)
+                        return response.json({success:1, message:'Data received!', data: res});
+                    });
+                }
+            });
+        }
+    });
+});
+
+/**
+ * seleccionar devices
+ * picas request
+ * llama check device availability -> regresar una lista de available devices y no available devices
+ * llamar make request para availables
+ * mostrar no availables
+ * 
+ * 
+ * otra forma
+ *  - si estan available -> make request
+ *  - no estan available -> mensaje de error diciendo que devices estan unavailable
+ * 
+ * 
+ */
