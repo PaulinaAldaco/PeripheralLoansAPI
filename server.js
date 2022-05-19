@@ -192,30 +192,26 @@ app.post('/newRequest', function(request, response){
             console.log(err)
             return response.json({success:-1, message:err});
         } else {
-            var params = request.body['request_params']
+            var params = request.body
             console.log(params)
             
             // Build queries
             request_query = "INSERT INTO QGJ93840.REQUESTS VALUES"
-            device_query = ""
+            device_query =  "UPDATE QGJ93840.DEVICES SET " + '"device_state"' + " = 'Requested' WHERE id IN ("
             for (let i = 0; i < params.length-1; i++) {
                 var request_query = 
                         request_query + "(DEFAULT, " + params[i]['user_id'] + "," +
                         params[i]['device_id'] +
                         ", DEFAULT, DEFAULT),";
                 var device_query = 
-                    device_query +
-                    "UPDATE QGJ93840.DEVICES SET " + '"device_state"' + " = 'Requested' WHERE id = " +
-                    params[i]['device_id'] + "; "
+                        device_query + params[i]['device_id'] + ', '
+
             }
             var request_query = 
                     request_query + "(DEFAULT, " + params[params.length-1]['user_id'] + "," +
                     params[params.length-1]['device_id'] +
                     ", DEFAULT, DEFAULT);";
-            var device_query = 
-                device_query +
-                "UPDATE QGJ93840.DEVICES SET " + '"device_state"' + " = 'Requested' WHERE id = " +
-                params[params.length-1]['device_id'] + "; "
+            var device_query = device_query + params[params.length-1]['device_id'] + ');'
             console.log(request_query);
             console.log(device_query);
 
@@ -257,7 +253,7 @@ app.post('/checkDeviceAvailability', function(request, response){
             console.log(err)
             return response.json({success:-1, message:err});
         } else {
-            var params = request.body['request_params']
+            var params = request.body
             console.log(params)
             
             // Build query
