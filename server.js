@@ -184,3 +184,33 @@ app.get('/countDevices', function(request, response){
         }
     });
 });
+
+app.post('/newRequest', function(request, response){
+    ibmdb.open(cn, async function (err,conn) {
+        console.log("posting")
+        if (err){
+            console.log(err)
+            return response.json({success:-1, message:err});
+        } else {
+            var params = request.body['request_params']
+            for (p in params) {
+                var q = "INSERT INTO QGJ93840.REQUEST"
+                 +" VALUES (DEFAULT, '" + p['user_id'] + "'," + p['device_id'] 
+                + ", DEFAULT, DEFAULT)";
+                console.log(q);
+                conn.query(q, function (err, data) {
+                    if (err){
+                        console.log(err);
+                        return response.json({success:-2, message:err});
+                    }
+                    else{
+                        conn.close(function () {
+                            console.log('done');
+                            return response.json({success:1, message:'Data entered!'});
+                        });
+                    }
+                });
+            }
+        }
+    });
+});
