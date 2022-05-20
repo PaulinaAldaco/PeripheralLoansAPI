@@ -34,6 +34,7 @@ ibmdb.open(cn, function (err,conn) {
     console.log("querying")
     if (err){
         //return response.json({success:-1, message:err});
+        console.log(cn)
         console.log("1")
         console.log(err)
     }
