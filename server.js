@@ -12,6 +12,7 @@ app.use(cors());
 app.use(bodyParser.json());
 //app.use(bodyParser.urlencoded({ extended: false }));
 
+console.log(process.env)
 const port = process.env.PORT
 const host = process.env.DB_HOST
 const user = process.env.DB_USER
