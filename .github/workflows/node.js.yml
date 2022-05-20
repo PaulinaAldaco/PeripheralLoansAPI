@@ -30,7 +30,10 @@ jobs:
       run: npm ci
     - name: Run build
       run: npm run build --if-present
-    - name: Run Tests
+    - name: Run start and test
+      run: |
+        npm start & npx wait-on http://localhost:3000
+        npm test
       env:
         DB_HOST: ${{ secrets.DB_HOST }}
         DB_USER: ${{ secrets.DB_USER }}
@@ -38,4 +41,4 @@ jobs:
         DB_DATABASE: ${{ secrets.DB_DATABASE }}
         DB_PORT: ${{ secrets.DB_PORT }}
         PORT: ${{ secrets.PORT }}
-      run: npm test
+      
