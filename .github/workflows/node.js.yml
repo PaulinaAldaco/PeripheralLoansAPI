@@ -12,7 +12,7 @@ on:
 
 jobs:
   build:
-
+    environment: api_environment
     runs-on: windows-latest
 
     strategy:
