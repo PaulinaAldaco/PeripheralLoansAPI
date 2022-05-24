@@ -17,7 +17,8 @@
     "cors": "^2.8.5",
     "express": "^4.17.3",
     "ibm_db": "^2.8.1",
-    "mocha": "^10.0.0"
+    "mocha": "^10.0.0",
+    "uuid": "^8.3.2"
   },
   "devDependencies": {
     "dotenv": "^16.0.0",

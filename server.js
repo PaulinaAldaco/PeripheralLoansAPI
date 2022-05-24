@@ -3,6 +3,7 @@ const express = require("express");
 const ibmdb = require("ibm_db");
 const async = require('async');
 const cors = require('cors');
+const { v4: uuidv4 } = require('uuid');
 
 const bodyParser=require('body-parser');
 
@@ -194,6 +195,7 @@ app.post('/newRequest', function(request, response){
         } else {
             var params = request.body
             console.log(params)
+            var loan_id = v4.uuidv4()
             
             // Build queries
             request_query = "INSERT INTO QGJ93840.REQUESTS VALUES"
@@ -202,7 +204,7 @@ app.post('/newRequest', function(request, response){
                 var request_query = 
                         request_query + "(DEFAULT, " + params[i]['user_id'] + "," +
                         params[i]['device_id'] +
-                        ", DEFAULT, DEFAULT),";
+                        ", DEFAULT, DEFAULT, " + loan_id + "),";
                 var device_query = 
                         device_query + params[i]['device_id'] + ', '
 
@@ -210,7 +212,7 @@ app.post('/newRequest', function(request, response){
             var request_query = 
                     request_query + "(DEFAULT, " + params[params.length-1]['user_id'] + "," +
                     params[params.length-1]['device_id'] +
-                    ", DEFAULT, DEFAULT);";
+                    ", DEFAULT, DEFAULT, " + loan_id + ");";
             var device_query = device_query + params[params.length-1]['device_id'] + ');'
             console.log(request_query);
             console.log(device_query);
