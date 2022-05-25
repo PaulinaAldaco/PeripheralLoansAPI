@@ -5,7 +5,7 @@ const expect = require('chai').expect;
 
 
 chai.use(chaiHttp);
-const url= 'http://localhost:4000';
+const url= 'https://rancho-back.mybluemix.net';
 
 
 describe('Get device count: ',()=>{
@@ -13,7 +13,7 @@ describe('Get device count: ',()=>{
         chai.request(url)
         .get('/countDevices')
         .end( function(err,res){
-            console.log(res.body)
+            console.log(res.body);
             expect(res).to.have.status(200);
             expect(res.body.data.count).to.be.a('number');
             done();
