@@ -5,7 +5,7 @@ const expect = require('chai').expect;
 
 
 chai.use(chaiHttp);
-const url= 'http://localhost:4000';
+const url= 'https://rancho-back.mybluemix.net';
 
 
 describe('Test device count: ',()=>{
