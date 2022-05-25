@@ -4,7 +4,7 @@
   "description": "Peripheral Loan Backend For IBM CLOUD DB2 ",
   "main": "server.js",
   "scripts": {
-    "test": "mocha tests",
+    "test": "mocha tests --timeout 10000",
     "start": "nodemon server.js"
   },
   "author": "",
