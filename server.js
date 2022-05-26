@@ -109,7 +109,7 @@ app.post('/newPeripheral', function(request, response){
             var params = request.body['device_params']
             var q = "INSERT INTO QGJ93840.DEVICES" +
                     " VALUES (DEFAULT, '" + params['device_type'] + "', '" + params['brand'] + "', '" +
-                    params['model'] + "', " + params['serial_number'] + ", DEFAULT, DEFAULT, DEFAULT, DEFAULT )";
+                    params['model'] + "', " + params['serial_number'] + ", DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT)";
             console.log(q);
             conn.query(q, function (err, data) {
             if (err){
@@ -257,7 +257,7 @@ app.post('/checkDeviceAvailability', function(request, response){
             console.log(params)
             
             // Build query
-            q = 'SELECT "ID","device_state" FROM QGJ93840.DEVICES WHERE "ID" IN ('
+            q = 'SELECT "ID", "serial_number", "device_state" FROM QGJ93840.DEVICES WHERE "ID" IN ('
             for (let i = 0; i < params.length-1; i++) {
                 var q = q + params[i]['device_id'] + ",";
             }
@@ -276,17 +276,23 @@ app.post('/checkDeviceAvailability', function(request, response){
                         console.log(data)
                         var avail = []
                         var unavail = []
+                        var avail_SN = []
+                        var unavail_SN = []
                         for (let i = 0; i < params.length; i++) {
                             if (data[i]["device_state"] == "Available") {
                                 avail.push(data[i]["ID"])
+                                avail_SN.push(data[i]["serial_number"])
                             }
                             else {
                                 unavail.push(data[i]["ID"])
+                                unavail_SN.push(data[i]["serial_number"])
                             }
                         }
                         res = {
+                            "available_SN": avail_SN,
                             "available": avail,
-                            "unavailable": unavail
+                            "unavailable": unavail,
+                            "unavailable_SN": unavail_SN
                         }
                         console.log(res)
                         return response.json({success:1, message:'Data received!', data: res});
