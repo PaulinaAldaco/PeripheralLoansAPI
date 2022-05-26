@@ -12,6 +12,8 @@ app.use(cors());
 app.use(bodyParser.json());
 //app.use(bodyParser.urlencoded({ extended: false }));
 
+console.log("env:")
+console.log(process.env)
 const port = process.env.PORT
 const host = process.env.DB_HOST
 const user = process.env.DB_USER
@@ -32,6 +34,7 @@ ibmdb.open(cn, function (err,conn) {
     console.log("querying")
     if (err){
         //return response.json({success:-1, message:err});
+        console.log(cn)
         console.log("1")
         console.log(err)
     }
