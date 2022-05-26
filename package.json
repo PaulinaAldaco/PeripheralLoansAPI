@@ -5,11 +5,13 @@
   "main": "server.js",
   "scripts": {
     "test": "mocha tests --timeout 10000",
-    "start": "nodemon server.js"
+    "start": "nodemon server.js",
+    "swagger-autogen": "node swagger.js"
   },
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "and": "^0.0.3",
     "async": "^3.2.3",
     "body-parser": "^1.20.0",
     "chai": "^4.3.6",
@@ -17,7 +19,9 @@
     "cors": "^2.8.5",
     "express": "^4.17.3",
     "ibm_db": "^2.8.1",
-    "mocha": "^10.0.0"
+    "mocha": "^10.0.0",
+    "swagger-autogen": "^2.21.2",
+    "swagger-ui-express": "^4.4.0"
   },
   "devDependencies": {
     "dotenv": "^16.0.0",
