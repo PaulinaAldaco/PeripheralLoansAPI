@@ -197,7 +197,7 @@ app.post('/newRequest', function(request, response){
             
             // Build queries
             request_query = "INSERT INTO QGJ93840.REQUESTS VALUES"
-            device_query =  "UPDATE QGJ93840.DEVICES SET " + '"device_state"' + " = 'Requested' WHERE REQUEST_ID IN ("
+            device_query =  "UPDATE QGJ93840.DEVICES SET " + '"device_state"' + " = 'Requested' WHERE DEVICE_ID IN ("
             for (let i = 0; i < params.length-1; i++) {
                 var request_query = 
                         request_query + "(DEFAULT, " + params[i]['user_id'] + "," +
