@@ -202,7 +202,7 @@ app.post('/newRequest', function(request, response){
                 var request_query = 
                         request_query + "(DEFAULT, " + params[i]['user_id'] + "," +
                         params[i]['device_id'] +
-                        ", DEFAULT, DEFAULT),";
+                        ", DEFAULT, DEFAULT, DEFAULT),";
                 var device_query = 
                         device_query + params[i]['device_id'] + ', '
 
@@ -210,7 +210,7 @@ app.post('/newRequest', function(request, response){
             var request_query = 
                     request_query + "(DEFAULT, " + params[params.length-1]['user_id'] + "," +
                     params[params.length-1]['device_id'] +
-                    ", DEFAULT, DEFAULT);";
+                    ", DEFAULT, DEFAULT, DEFAULT);";
             var device_query = device_query + params[params.length-1]['device_id'] + ');'
             console.log(request_query);
             console.log(device_query);
@@ -257,7 +257,7 @@ app.post('/checkDeviceAvailability', function(request, response){
             console.log(params)
             
             // Build query
-            q = 'SELECT "ID", "serial_number", "device_state" FROM QGJ93840.DEVICES WHERE "ID" IN ('
+            q = 'SELECT "DEVICE_ID", "serial_number", "device_state" FROM QGJ93840.DEVICES WHERE "DEVICE_ID" IN ('
             for (let i = 0; i < params.length-1; i++) {
                 var q = q + params[i]['device_id'] + ",";
             }
@@ -280,11 +280,11 @@ app.post('/checkDeviceAvailability', function(request, response){
                         var unavail_SN = []
                         for (let i = 0; i < params.length; i++) {
                             if (data[i]["device_state"] == "Available") {
-                                avail.push(data[i]["ID"])
+                                avail.push(data[i]["DEVICE_ID"])
                                 avail_SN.push(data[i]["serial_number"])
                             }
                             else {
-                                unavail.push(data[i]["ID"])
+                                unavail.push(data[i]["DEVICE_ID"])
                                 unavail_SN.push(data[i]["serial_number"])
                             }
                         }
@@ -330,17 +330,74 @@ app.post('/checkDeviceAvailability', function(request, response){
             console.log(err)
             return response.json({success:-1, message:err});
         } else {
-            conn.query("SELECT * FROM QGJ93840.DEVICES WHERE ID = "+ params["deviceID"] + ";", function (err, data) {
+            conn.query("SELECT * FROM QGJ93840.DEVICES WHERE DEVICE_ID = "+ params["deviceID"] + ";", function (err, data) {
                 if (err){
                 console.log(err);
                 return response.json({success:-2, message:err});
             }
             else{
                 conn.close(function () {
-                    console.log("Using query: SELECT * FROM QGJ93840.DEVICES WHERE ID = "+ params["deviceID"] + ";")
+                    console.log("Using query: SELECT * FROM QGJ93840.DEVICES WHERE DEVICE_ID = "+ params["deviceID"] + ";")
                     console.log('done');
                     // console.log(data)
                     return response.json({success:1, message:'Data Received!', data:data});
+                });
+            }
+          });
+        }
+    });
+});
+
+app.post('/getRequests', function(request, response){
+    var params = request.body
+    var limit = params['limit']
+    var offset = (params['page']-1) * limit
+    // var limit = 10
+    // var offset = (1-1) * limit
+    ibmdb.open(cn, async function (err,conn) {
+        console.log("querying")
+        if (err){
+            //return response.json({success:-1, message:err});
+            console.log("1")
+            console.log(err)
+            return response.json({success:-1, message:err});
+        } else {
+            conn.query("SELECT * FROM QGJ93840.REQUESTS LIMIT "+ offset + "," + limit, function (err, data) {
+                if (err){
+                console.log(err);
+                return response.json({success:-2, message:err});
+            }
+            else{
+                conn.close(function () {
+                    console.log("Using query: SELECT * FROM QGJ93840.REQUESTS LIMIT "+ offset + "," + limit)
+                    console.log('done');
+                    return response.json({success:1, message:'Data Received!', data:data});
+                });
+            }
+          });
+        }
+    });
+});
+
+app.get('/countRequests', function(request, response){
+    ibmdb.open(cn, async function (err,conn) {
+        console.log("querying")
+        if (err){
+            //return response.json({success:-1, message:err});
+            console.log("1")
+            console.log(err)
+            return response.json({success:-1, message:err});
+        } else {
+            conn.query("SELECT COUNT(*) FROM QGJ93840.REQUESTS", function (err, data) {
+                if (err){
+                console.log(err);
+                return response.json({success:-2, message:err});
+            }
+            else{
+                conn.close(function () {
+                    console.log('done');
+                    console.log(data)
+                    return response.json({success:1, message:'Data Received!', data:{"count": data[0]["1"]}});
                 });
             }
           });
