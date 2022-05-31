@@ -202,7 +202,7 @@ app.post('/newRequest', function(request, response){
                 var request_query = 
                         request_query + "(DEFAULT, " + params[i]['user_id'] + "," +
                         params[i]['device_id'] +
-                        ", DEFAULT, DEFAULT, DEFAULT),";
+                        ", DEFAULT, DEFAULT," +params[i]['return_date']+"),";
                 var device_query = 
                         device_query + params[i]['device_id'] + ', '
 
@@ -210,7 +210,7 @@ app.post('/newRequest', function(request, response){
             var request_query = 
                     request_query + "(DEFAULT, " + params[params.length-1]['user_id'] + "," +
                     params[params.length-1]['device_id'] +
-                    ", DEFAULT, DEFAULT, DEFAULT);";
+                    ", DEFAULT, DEFAULT," +params[i]['return_date']+")";
             var device_query = device_query + params[params.length-1]['device_id'] + ');'
             console.log(request_query);
             console.log(device_query);
@@ -257,7 +257,7 @@ app.post('/userToID', function(request, response){
             console.log(params)
             
             // Build query
-            q = "SELECT 'USER_ID' FROM QGJ93840.USER WHERE USERNAME' = " + "'" + params['username'] +"';";
+            q = "SELECT USER_ID FROM QGJ93840.USER WHERE USERNAME = " + "'" + params['username'] +"';";
 
             console.log(q);
 
@@ -394,14 +394,14 @@ app.post('/getRequests', function(request, response){
             console.log(err)
             return response.json({success:-1, message:err});
         } else {
-            conn.query("SELECT * FROM QGJ93840.REQUESTS LIMIT "+ offset + "," + limit, function (err, data) {
+            conn.query("SELECT * FROM QGJ93840.REQUESTS FULL INNER JOIN QGJ93840.DEVICES USING (DEVICE_ID) LIMIT "+ offset + "," + limit, function (err, data) {
                 if (err){
                 console.log(err);
                 return response.json({success:-2, message:err});
             }
             else{
                 conn.close(function () {
-                    console.log("Using query: SELECT * FROM QGJ93840.REQUESTS LIMIT "+ offset + "," + limit)
+                    console.log("Using query: SELECT * FROM QGJ93840.REQUESTS FULL INNER JOIN QGJ93840.DEVICES USING (DEVICE_ID) LIMIT "+ offset + "," + limit)
                     console.log('done');
                     return response.json({success:1, message:'Data Received!', data:data});
                 });
