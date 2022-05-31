@@ -202,7 +202,7 @@ app.post('/newRequest', function(request, response){
                 var request_query = 
                         request_query + "(DEFAULT, " + params[i]['user_id'] + "," +
                         params[i]['device_id'] +
-                        ", DEFAULT, TIMESTAMP_FORMAT(" +"'"+params[i]['return_date']+"', 'YYYY-MM-DD HH24:MI:SS'), DEFAULT)";
+                        ", DEFAULT, TIMESTAMP_FORMAT(" +"'"+params[i]['return_date']+"', 'YYYY-MM-DD HH24:MI:SS'), DEFAULT),";
                 var device_query = 
                         device_query + params[i]['device_id'] + ', '
 
