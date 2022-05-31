@@ -246,6 +246,37 @@ app.post('/newRequest', function(request, response){
         }
     });
 });
+app.post('/userToID', function(request, response){
+    ibmdb.open(cn, async function (err,conn) {
+        console.log("posting")
+        if (err){
+            console.log(err)
+            return response.json({success:-1, message:err});
+        } else {
+            var params = request.body
+            console.log(params)
+            
+            // Build query
+            q = "SELECT 'USER_ID' FROM QGJ93840.USER WHERE USERNAME' = " + "'" + params['username'] +"';";
+
+            console.log(q);
+
+            conn.query(q, function (err, data) {
+                if (err){
+                    console.log(err);
+                    return response.json({success:-2, message:err});
+                }
+                else{
+                    conn.close(function () {
+                        console.log('done');
+                        console.log(data)
+                        return response.json({success:1, message:'Data received!', data: data});
+                    });
+                }
+            });
+        }
+    });
+});
 
 app.post('/checkDeviceAvailability', function(request, response){
     ibmdb.open(cn, async function (err,conn) {
