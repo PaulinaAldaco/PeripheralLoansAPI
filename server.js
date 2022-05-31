@@ -226,22 +226,23 @@ app.post('/newRequest', function(request, response){
                         console.log('done');
                         //return response.json({success:1, message:'Data entered!'});
                     });
+                    conn.query(device_query, function (err, data) {
+                        if (err){
+                            console.log(err);
+                            return response.json({success:-2, message:err});
+                        }
+                        else{
+                            conn.close(function () {
+                                console.log('done');
+                                return response.json({success:1, message:'Data entered and updated!'});
+                            });
+                        }
+                    });
                 }
             });
 
             // Update device states
-            conn.query(device_query, function (err, data) {
-                if (err){
-                    console.log(err);
-                    return response.json({success:-2, message:err});
-                }
-                else{
-                    conn.close(function () {
-                        console.log('done');
-                        return response.json({success:1, message:'Data entered and updated!'});
-                    });
-                }
-            });
+            
         }
     });
 });
