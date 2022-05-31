@@ -257,7 +257,7 @@ app.post('/userToID', function(request, response){
             console.log(params)
             
             // Build query
-            q = "SELECT 'USER_ID' FROM QGJ93840.USER WHERE USERNAME' = " + "'" + params['username'] +"';";
+            q = "SELECT USER_ID FROM QGJ93840.USER WHERE USERNAME = " + "'" + params['username'] +"';";
 
             console.log(q);
 
