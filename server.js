@@ -222,10 +222,10 @@ app.post('/newRequest', function(request, response){
                     return response.json({success:-2, message:err});
                 }
                 else{
-                    conn.close(function () {
-                        console.log('done');
-                        //return response.json({success:1, message:'Data entered!'});
-                    });
+                    // conn.close(function () {
+                    console.log('done');
+                    //     //return response.json({success:1, message:'Data entered!'});
+                    // });
                     conn.query(device_query, function (err, data) {
                         if (err){
                             console.log(err);
