@@ -202,7 +202,7 @@ app.post('/newRequest', function(request, response){
                 var request_query = 
                         request_query + "(DEFAULT, " + params[i]['user_id'] + "," +
                         params[i]['device_id'] +
-                        ", DEFAULT, DEFAULT," +"'"+params[i]['return_date']+"'),";
+                        ", DEFAULT, DEFAULT, TIMESTAMP_FORMAT(" +"'"+params[i]['return_date']+"', 'YYYY-MM-DD HH24:MI:SS'))";
                 var device_query = 
                         device_query + params[i]['device_id'] + ', '
 
@@ -210,7 +210,7 @@ app.post('/newRequest', function(request, response){
             var request_query = 
                     request_query + "(DEFAULT, " + params[params.length-1]['user_id'] + "," +
                     params[params.length-1]['device_id'] +
-                    ", DEFAULT, DEFAULT," +"'"+params[params.length-1]['return_date']+"')";
+                    ", DEFAULT, DEFAULT, TIMESTAMP_FORMAT(" +"'"+params[params.length-1]['return_date']+"', 'YYYY-MM-DD HH24:MI:SS'))";
             var device_query = device_query + params[params.length-1]['device_id'] + ');'
             console.log(request_query);
             console.log(device_query);
