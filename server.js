@@ -411,7 +411,7 @@ app.post('/getRequests', function(request, response){
     });
 });
 
-app.get('/countRequests', function(request, response){
+app.post('/countRequests', function(request, response){
     ibmdb.open(cn, async function (err,conn) {
         console.log("querying")
         var params = request.body
