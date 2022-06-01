@@ -421,7 +421,7 @@ app.post('/countRequests', function(request, response){
             console.log(err)
             return response.json({success:-1, message:err});
         } else {
-            conn.query("SELECT COUNT(*) FROM QGJ93840.REQUESTS WHERE STATUS = "+ params["STATUS"], function (err, data) {
+            conn.query("SELECT COUNT(*) FROM QGJ93840.REQUESTS WHERE STATUS = '"+ params["STATUS"]+"'", function (err, data) {
                 if (err){
                 console.log(err);
                 return response.json({success:-2, message:err});
