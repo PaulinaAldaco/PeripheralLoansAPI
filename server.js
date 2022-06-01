@@ -83,7 +83,7 @@ app.get('/users', function(request, response){
             console.log(err)
             return response.json({success:-1, message:err});
         } else {
-            conn.query(`SELECT * FROM QGJ93840.USER`, function (err, data) {
+            conn.query('SELECT USER_ID, USERNAME, ROLE FROM QGJ93840.USER', function (err, data) {
             if (err){
                 console.log(err);
                 return response.json({success:-2, message:err});
@@ -527,3 +527,31 @@ app.post('/rejectRequest', function(request, response){
     });
 });
 
+app.post('/newUser', function(request, response){
+    ibmdb.open(cn, async function (err,conn) {
+        console.log("posting")
+        if (err){
+            console.log(err)
+            return response.json({success:-1, message:err});
+        } else {
+            var params = request.body['device_params']
+            var q = "INSERT INTO QGJ93840.DEVICES" +
+                    " VALUES (DEFAULT, '" + params['device_type'] + "', '" + params['brand'] + "', '" +
+                    params['model'] + "', " + params['serial_number'] + ", DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT)";
+            console.log(q);
+            conn.query(q, function (err, data) {
+            if (err){
+                console.log(err);
+                return response.json({success:-2, message:err});
+            }
+            else{
+                conn.close(function () {
+                    console.log('done');
+                    return response.json({success:1, message:'Data entered!'});
+                });
+            
+            }
+          });
+        }
+    });
+});
