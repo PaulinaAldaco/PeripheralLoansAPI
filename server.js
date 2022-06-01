@@ -401,7 +401,7 @@ app.post('/getRequests', function(request, response){
             }
             else{
                 conn.close(function () {
-                    console.log('Using query: SELECT REQUEST_ID, USERNAME, "device_type", "brand", "model", "serial_number", "device_state", "conditions_accepted", "in_campus", "Security_Auth", "last_admission_date", "last_exit_date", DATE as REQUEST_DATE,  RETURN_DATE, DEVICE_ID, STATUS FROM QGJ93840.REQUESTS FULL INNER JOIN QGJ93840.DEVICES USING (DEVICE_ID) JOIN QGJ93840.USER USING (USER_ID) WHERE STATUS ='+ "'" + params["STATUS"] + "' LIMIT"+ offset + ", " + limit)
+                    console.log('Using query: SELECT REQUEST_ID, USERNAME, "device_type", "brand", "model", "serial_number", "device_state", "conditions_accepted", "in_campus", "Security_Auth", "last_admission_date", "last_exit_date", DATE as REQUEST_DATE,  RETURN_DATE, DEVICE_ID, STATUS FROM QGJ93840.REQUESTS FULL INNER JOIN QGJ93840.DEVICES USING (DEVICE_ID) JOIN QGJ93840.USER USING (USER_ID) WHERE STATUS ='+ "'" + params["STATUS"] + "' LIMIT "+ offset + ", " + limit)
                     console.log('done');
                     return response.json({success:1, message:'Data Received!', data:data});
                 });
