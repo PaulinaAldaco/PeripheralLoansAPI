@@ -480,7 +480,7 @@ app.post('/acceptRequest', function(request, response){
             
             // Build queries
             change_accepted_Con =  'UPDATE QGJ93840.DEVICES SET "conditions_accepted" = 1 WHERE DEVICE_ID = ' + params['device_id']
-            update_REQ_status =  "UPDATE QGJ93840.REQUESTS SET STATUS = 'Accepted' WHERE REQUEST_ID = " + params['requested_id']
+            update_REQ_status =  "UPDATE QGJ93840.REQUESTS SET STATUS = 'Accepted' WHERE REQUEST_ID = " + params['request_id']
 
 
             // Create device requests
