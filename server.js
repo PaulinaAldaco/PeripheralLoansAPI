@@ -394,14 +394,14 @@ app.post('/getRequests', function(request, response){
             console.log(err)
             return response.json({success:-1, message:err});
         } else {
-            conn.query('SELECT REQUEST_ID, USERNAME, "device_type", "brand", "model", "serial_number", "device_state", "conditions_accepted", "in_campus", "Security_Auth", "last_admission_date", "last_exit_date", DATE as REQUEST_DATE,  RETURN_DATE, STATUS FROM QGJ93840.REQUESTS FULL INNER JOIN QGJ93840.DEVICES USING (DEVICE_ID) JOIN QGJ93840.USER USING (USER_ID) WHERE STATUS ='+ "'" + params["STATUS"] + "' LIMIT " + offset + ", " + limit, function (err, data) {
+            conn.query('SELECT REQUEST_ID, USERNAME, "device_type", "brand", "model", "serial_number", "device_state", "conditions_accepted", "in_campus", "Security_Auth", "last_admission_date", "last_exit_date", DATE as REQUEST_DATE,  RETURN_DATE, DEVICE_ID STATUS FROM QGJ93840.REQUESTS FULL INNER JOIN QGJ93840.DEVICES USING (DEVICE_ID) JOIN QGJ93840.USER USING (USER_ID) WHERE STATUS ='+ "'" + params["STATUS"] + "' LIMIT " + offset + ", " + limit, function (err, data) {
                 if (err){
                 console.log(err);
                 return response.json({success:-2, message:err});
             }
             else{
                 conn.close(function () {
-                    console.log('Using query: SELECT REQUEST_ID, USERNAME, "device_type", "brand", "model", "serial_number", "device_state", "conditions_accepted", "in_campus", "Security_Auth", "last_admission_date", "last_exit_date", DATE as REQUEST_DATE,  RETURN_DATE, STATUS FROM QGJ93840.REQUESTS FULL INNER JOIN QGJ93840.DEVICES USING (DEVICE_ID) JOIN QGJ93840.USER USING (USER_ID) WHERE STATUS ='+ "'" + params["STATUS"] + "' LIMIT"+ offset + ", " + limit)
+                    console.log('Using query: SELECT REQUEST_ID, USERNAME, "device_type", "brand", "model", "serial_number", "device_state", "conditions_accepted", "in_campus", "Security_Auth", "last_admission_date", "last_exit_date", DATE as REQUEST_DATE,  RETURN_DATE, DEVICE_ID STATUS FROM QGJ93840.REQUESTS FULL INNER JOIN QGJ93840.DEVICES USING (DEVICE_ID) JOIN QGJ93840.USER USING (USER_ID) WHERE STATUS ='+ "'" + params["STATUS"] + "' LIMIT"+ offset + ", " + limit)
                     console.log('done');
                     return response.json({success:1, message:'Data Received!', data:data});
                 });
@@ -434,6 +434,50 @@ app.post('/countRequests', function(request, response){
                 });
             }
           });
+        }
+    });
+});
+
+app.post('/acceptRequest', function(request, response){
+    ibmdb.open(cn, async function (err,conn) {
+        console.log("posting")
+        if (err){
+            console.log(err)
+            return response.json({success:-1, message:err});
+        } else {
+            var params = request.body
+            console.log(params)
+            
+            // Build queries
+            change_accepted_Con =  "UPDATE QGJ93840.DEVICES SET " + '"conditions_accepted"' + " = 1 WHERE DEVICE_ID IN (" + params['device_id'] + ');'
+            update_REQ_status =  "UPDATE QGJ93840.REQUESTS SET " + '"STATUS"' + " = 'Accepted' WHERE REQUESTED_ID IN (" + params['requested_id'] + ');'
+            console.log(accept_q);
+
+            // Create device requests
+            conn.query(change_accepted_Con, function (err, data) {
+                if (err){
+                    console.log(err);
+                    return response.json({success:-2, message:err});
+                }
+                else{
+                    // conn.close(function () {
+                    console.log('done');
+                    //     //return response.json({success:1, message:'Data entered!'});
+                    // });
+                    conn.query(update_REQ_status, function (err, data) {
+                        if (err){
+                            console.log(err);
+                            return response.json({success:-2, message:err});
+                        }
+                        else{
+                            conn.close(function () {
+                                console.log('done');
+                                return response.json({success:1, message:'Data entered and updated!'});
+                            });
+                        }
+                    });
+                }
+            });
         }
     });
 });
