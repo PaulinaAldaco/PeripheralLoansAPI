@@ -102,7 +102,7 @@ app.get('/users', function(request, response){
     });
 });
 
-app.get('/countDevices', function(request, response){
+app.get('/countUsers', function(request, response){
     ibmdb.open(cn, async function (err,conn) {
         console.log("querying")
         if (err){
@@ -111,7 +111,7 @@ app.get('/countDevices', function(request, response){
             console.log(err)
             return response.json({success:-1, message:err});
         } else {
-            conn.query("SELECT COUNT(*) FROM QGJ93840.DEVICES", function (err, data) {
+            conn.query("SELECT COUNT(*) FROM QGJ93840.USERS", function (err, data) {
                 if (err){
                 console.log(err);
                 return response.json({success:-2, message:err});
