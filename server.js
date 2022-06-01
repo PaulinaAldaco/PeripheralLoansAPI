@@ -74,7 +74,7 @@ app.get('/checkLogin', function(request, response){
     });
 });
 
-app.get('/users', function(request, response){
+app.post('/users', function(request, response){
     var params = request.body
     var limit = params['limit']
     var offset = (params['page']-1) * limit
@@ -86,6 +86,8 @@ app.get('/users', function(request, response){
             console.log(err)
             return response.json({success:-1, message:err});
         } else {
+            console.log("limit: ", limit)
+            console.log("offset: ", offset)
             conn.query('SELECT USER_ID, USERNAME, ROLE FROM QGJ93840.USER LIMIT '+ offset + "," + limit, function (err, data) {
             if (err){
                 console.log(err);
