@@ -414,6 +414,7 @@ app.post('/getRequests', function(request, response){
 app.get('/countRequests', function(request, response){
     ibmdb.open(cn, async function (err,conn) {
         console.log("querying")
+        var params = request.body
         if (err){
             //return response.json({success:-1, message:err});
             console.log("1")
