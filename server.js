@@ -495,7 +495,7 @@ app.post('/rejectRequest', function(request, response){
             
             // Build queries
             change_device_State =  'UPDATE QGJ93840.DEVICES SET "device_state" = '+"'Available'"+' WHERE DEVICE_ID = ' + params['device_id']
-            update_REQ_status =  "UPDATE QGJ93840.REQUESTS SET STATUS = 'Rejected' WHERE REQUEST_ID = " + params['request_id']
+            update_REQ_status =  "UPDATE QGJ93840.REQUESTS SET STATUS = 'Denied' WHERE REQUEST_ID = " + params['request_id']
 
 
             // Create device requests
