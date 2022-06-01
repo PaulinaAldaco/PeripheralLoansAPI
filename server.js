@@ -565,7 +565,7 @@ app.post('/newUser', function(request, response){
             return response.json({success:-1, message:err});
         } else {
             var params = request.body['user_params']
-            var q = "INSERT INTO QGJ93840.DEVICES" +
+            var q = "INSERT INTO QGJ93840.USER" +
                     " VALUES (Default, '"+params['username']+"', '"+params['password']+"', "+
                     params['role']+")";
             console.log(q);
