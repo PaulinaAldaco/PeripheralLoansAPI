@@ -481,3 +481,49 @@ app.post('/acceptRequest', function(request, response){
         }
     });
 });
+
+
+app.post('/rejectRequest', function(request, response){
+    ibmdb.open(cn, async function (err,conn) {
+        console.log("posting")
+        if (err){
+            console.log(err)
+            return response.json({success:-1, message:err});
+        } else {
+            var params = request.body
+            console.log(params)
+            
+            // Build queries
+            change_device_State =  'UPDATE QGJ93840.DEVICES SET "device_state" = '+"'Available'"+' WHERE DEVICE_ID = ' + params['device_id']
+            update_REQ_status =  "UPDATE QGJ93840.REQUESTS SET STATUS = 'Rejected' WHERE REQUEST_ID = " + params['request_id']
+
+
+            // Create device requests
+            conn.query(update_REQ_status, function (err, data) {
+                if (err){
+                    console.log(err);
+                    return response.json({success:-2, message:err});
+                }
+                else{
+                    // conn.close(function () {
+                    console.log('done');
+                    //     //return response.json({success:1, message:'Data entered!'});
+                    // });
+                    conn.query(change_device_State, function (err, data) {
+                        if (err){
+                            console.log(err);
+                            return response.json({success:-2, message:err});
+                        }
+                        else{
+                            conn.close(function () {
+                                console.log('done');
+                                return response.json({success:1, message:'Data entered and updated!'});
+                            });
+                        }
+                    });
+                }
+            });
+        }
+    });
+});
+
