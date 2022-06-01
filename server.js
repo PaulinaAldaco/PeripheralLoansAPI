@@ -111,7 +111,7 @@ app.get('/countUsers', function(request, response){
             console.log(err)
             return response.json({success:-1, message:err});
         } else {
-            conn.query("SELECT COUNT(*) FROM QGJ93840.USERS", function (err, data) {
+            conn.query("SELECT COUNT(*) FROM QGJ93840.USER", function (err, data) {
                 if (err){
                 console.log(err);
                 return response.json({success:-2, message:err});
