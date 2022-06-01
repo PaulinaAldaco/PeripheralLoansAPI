@@ -394,14 +394,14 @@ app.post('/getRequests', function(request, response){
             console.log(err)
             return response.json({success:-1, message:err});
         } else {
-            conn.query('SELECT REQUEST_ID, USERNAME, "device_type", "brand", "model", "serial_number", "device_state", "conditions_accepted", "in_campus", "Security_Auth", "last_admission_date", "last_exit_date", DATE as REQUEST_DATE,  RETURN_DATE, STATUS FROM QGJ93840.REQUESTS FULL INNER JOIN QGJ93840.DEVICES USING (DEVICE_ID) JOIN QGJ93840.USER USING (USER_ID) WHERE STATUS ='+ "'" + params["STATUS"] + "' LIMIT '+ offset + ", " + limit + ", function (err, data) {
+            conn.query('SELECT REQUEST_ID, USERNAME, "device_type", "brand", "model", "serial_number", "device_state", "conditions_accepted", "in_campus", "Security_Auth", "last_admission_date", "last_exit_date", DATE as REQUEST_DATE,  RETURN_DATE, STATUS FROM QGJ93840.REQUESTS FULL INNER JOIN QGJ93840.DEVICES USING (DEVICE_ID) JOIN QGJ93840.USER USING (USER_ID) WHERE STATUS ='+ "'" + params["STATUS"] + "' LIMIT " + offset + ", " + limit, function (err, data) {
                 if (err){
                 console.log(err);
                 return response.json({success:-2, message:err});
             }
             else{
                 conn.close(function () {
-                    console.log('Using query: SELECT REQUEST_ID, USERNAME, "device_type", "brand", "model", "serial_number", "device_state", "conditions_accepted", "in_campus", "Security_Auth", "last_admission_date", "last_exit_date", DATE as REQUEST_DATE,  RETURN_DATE, STATUS FROM QGJ93840.REQUESTS FULL INNER JOIN QGJ93840.DEVICES USING (DEVICE_ID) JOIN QGJ93840.USER USING (USER_ID) WHERE STATUS ='+ "'" + params["STATUS"] + "' LIMIT '+ offset + ", " + limit + ")
+                    console.log('Using query: SELECT REQUEST_ID, USERNAME, "device_type", "brand", "model", "serial_number", "device_state", "conditions_accepted", "in_campus", "Security_Auth", "last_admission_date", "last_exit_date", DATE as REQUEST_DATE,  RETURN_DATE, STATUS FROM QGJ93840.REQUESTS FULL INNER JOIN QGJ93840.DEVICES USING (DEVICE_ID) JOIN QGJ93840.USER USING (USER_ID) WHERE STATUS ='+ "'" + params["STATUS"] + "' LIMIT"+ offset + ", " + limit)
                     console.log('done');
                     return response.json({success:1, message:'Data Received!', data:data});
                 });
