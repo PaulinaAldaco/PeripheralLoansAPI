@@ -564,10 +564,10 @@ app.post('/newUser', function(request, response){
             console.log(err)
             return response.json({success:-1, message:err});
         } else {
-            var params = request.body['device_params']
+            var params = request.body['user_params']
             var q = "INSERT INTO QGJ93840.DEVICES" +
-                    " VALUES (DEFAULT, '" + params['device_type'] + "', '" + params['brand'] + "', '" +
-                    params['model'] + "', " + params['serial_number'] + ", DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT)";
+                    " VALUES (Default, '"+params['username']+"', '"+params['password']+"', "+
+                    params['role']+")";
             console.log(q);
             conn.query(q, function (err, data) {
             if (err){
