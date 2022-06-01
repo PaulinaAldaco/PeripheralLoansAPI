@@ -75,6 +75,9 @@ app.get('/checkLogin', function(request, response){
 });
 
 app.get('/users', function(request, response){
+    var params = request.body
+    var limit = params['limit']
+    var offset = (params['page']-1) * limit
     ibmdb.open(cn, async function (err,conn) {
         console.log("querying")
         if (err){
@@ -83,7 +86,7 @@ app.get('/users', function(request, response){
             console.log(err)
             return response.json({success:-1, message:err});
         } else {
-            conn.query('SELECT USER_ID, USERNAME, ROLE FROM QGJ93840.USER', function (err, data) {
+            conn.query('SELECT USER_ID, USERNAME, ROLE FROM QGJ93840.USER LIMIT '+ offset + "," + limit, function (err, data) {
             if (err){
                 console.log(err);
                 return response.json({success:-2, message:err});
@@ -98,6 +101,33 @@ app.get('/users', function(request, response){
         }
     });
 });
+
+app.get('/countDevices', function(request, response){
+    ibmdb.open(cn, async function (err,conn) {
+        console.log("querying")
+        if (err){
+            //return response.json({success:-1, message:err});
+            console.log("1")
+            console.log(err)
+            return response.json({success:-1, message:err});
+        } else {
+            conn.query("SELECT COUNT(*) FROM QGJ93840.DEVICES", function (err, data) {
+                if (err){
+                console.log(err);
+                return response.json({success:-2, message:err});
+            }
+            else{
+                conn.close(function () {
+                    console.log('done');
+                    console.log(data)
+                    return response.json({success:1, message:'Data Received!', data:{"count": data[0]["1"]}});
+                });
+            }
+          });
+        }
+    });
+});
+
 
 app.post('/newPeripheral', function(request, response){
     ibmdb.open(cn, async function (err,conn) {
