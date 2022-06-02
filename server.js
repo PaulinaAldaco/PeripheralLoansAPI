@@ -585,3 +585,32 @@ app.post('/newUser', function(request, response){
         }
     });
 });
+
+app.post('/getUserRequests', function(request, response){
+    var params = request.body
+
+    ibmdb.open(cn, async function (err,conn) {
+        console.log("querying")
+        if (err){
+            //return response.json({success:-1, message:err});
+            console.log("1")
+            console.log(err)
+            return response.json({success:-1, message:err});
+        } else {
+            conn.query("SELECT * FROM QGJ93840.REQUESTS WHERE STATUS = 'Accepted' AND USER_ID = "+ params["userID"] + ";", function (err, data) {
+                if (err){
+                console.log(err);
+                return response.json({success:-2, message:err});
+            }
+            else{
+                conn.close(function () {
+                    console.log("Using query: SELECT * FROM QGJ93840.REQUESTS WHERE STATUS = 'Accepted' AND USER_ID = "+ params["userID"] +  ";")
+                    console.log('done');
+                    // console.log(data)
+                    return response.json({success:1, message:'Data Received!', data:data});
+                });
+            }
+          });
+        }
+    });
+});
