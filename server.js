@@ -661,7 +661,7 @@ app.post('/editUserInfo', function(request, response){
             var params = request.body['user_params']
             console.log(body['user_params'])
             console.log(params['columns'])
-            if(params['columns'] == "USERNAME" || params['columns'] == "PASSWORD"){
+            if(params['columns'] == "USERNAME"){
                 console.log("entro if 1")
                 var q = "UPDATE QGJ93840.USER SET "+params['column']+" = '"+params['change']+"' WHERE USER_ID = "+params['userID'];
             }else if(params['columns'] == "ROLE"){
