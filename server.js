@@ -215,6 +215,38 @@ app.get('/countDevices', function(request, response){
     });
 });
 
+app.post('/userToID', function(request, response){
+    ibmdb.open(cn, async function (err,conn) {
+        console.log("posting")
+        if (err){
+            console.log(err)
+            return response.json({success:-1, message:err});
+        } else {
+            var params = request.body
+            console.log(params)
+            
+            // Build query
+            q = "SELECT USER_ID FROM QGJ93840.USER WHERE USERNAME = " + "'" + params['username'] +"';";
+
+            console.log(q);
+
+            conn.query(q, function (err, data) {
+                if (err){
+                    console.log(err);
+                    return response.json({success:-2, message:err});
+                }
+                else{
+                    conn.close(function () {
+                        console.log('done');
+                        console.log(data)
+                        return response.json({success:1, message:'Data received!', data: data});
+                    });
+                }
+            });
+        }
+    });
+});
+
 app.post('/newRequest', function(request, response){
     ibmdb.open(cn, async function (err,conn) {
         console.log("posting")
@@ -273,37 +305,6 @@ app.post('/newRequest', function(request, response){
 
             // Update device states
             
-        }
-    });
-});
-app.post('/userToID', function(request, response){
-    ibmdb.open(cn, async function (err,conn) {
-        console.log("posting")
-        if (err){
-            console.log(err)
-            return response.json({success:-1, message:err});
-        } else {
-            var params = request.body
-            console.log(params)
-            
-            // Build query
-            q = "SELECT USER_ID FROM QGJ93840.USER WHERE USERNAME = " + "'" + params['username'] +"';";
-
-            console.log(q);
-
-            conn.query(q, function (err, data) {
-                if (err){
-                    console.log(err);
-                    return response.json({success:-2, message:err});
-                }
-                else{
-                    conn.close(function () {
-                        console.log('done');
-                        console.log(data)
-                        return response.json({success:1, message:'Data received!', data: data});
-                    });
-                }
-            });
         }
     });
 });
@@ -424,14 +425,14 @@ app.post('/getRequests', function(request, response){
             console.log(err)
             return response.json({success:-1, message:err});
         } else {
-            conn.query('SELECT REQUEST_ID, USERNAME, "device_type", "brand", "model", "serial_number", "device_state", "conditions_accepted", "in_campus", "Security_Auth", "last_admission_date", "last_exit_date", DATE as REQUEST_DATE,  RETURN_DATE, DEVICE_ID, STATUS FROM QGJ93840.REQUESTS FULL INNER JOIN QGJ93840.DEVICES USING (DEVICE_ID) JOIN QGJ93840.USER USING (USER_ID) WHERE STATUS ='+ "'" + params["STATUS"] + "' ORDER BY REQUEST_DATE LIMIT " + offset + ", " + limit, function (err, data) {
+            conn.query('SELECT REQUEST_ID, USERNAME, "device_type", "brand", "model", "serial_number", "device_state", "conditions_accepted", "in_campus", "Security_Auth", "last_admission_date", "last_exit_date", DATE as REQUEST_DATE,  RETURN_DATE, DEVICE_ID, USER_ID, STATUS FROM QGJ93840.REQUESTS FULL INNER JOIN QGJ93840.DEVICES USING (DEVICE_ID) JOIN QGJ93840.USER USING (USER_ID) WHERE STATUS ='+ "'" + params["STATUS"] + "' ORDER BY REQUEST_DATE LIMIT " + offset + ", " + limit, function (err, data) {
                 if (err){
                 console.log(err);
                 return response.json({success:-2, message:err});
             }
             else{
                 conn.close(function () {
-                    console.log('Using query: SELECT REQUEST_ID, USERNAME, "device_type", "brand", "model", "serial_number", "device_state", "conditions_accepted", "in_campus", "Security_Auth", "last_admission_date", "last_exit_date", DATE as REQUEST_DATE,  RETURN_DATE, DEVICE_ID, STATUS FROM QGJ93840.REQUESTS FULL INNER JOIN QGJ93840.DEVICES USING (DEVICE_ID) JOIN QGJ93840.USER USING (USER_ID) WHERE STATUS ='+ "'" + params["STATUS"] + "' ORDER BY REQUEST_DATE LIMIT "+ offset + ", " + limit)
+                    console.log('Using query: SELECT REQUEST_ID, USERNAME, "device_type", "brand", "model", "serial_number", "device_state", "conditions_accepted", "in_campus", "Security_Auth", "last_admission_date", "last_exit_date", DATE as REQUEST_DATE,  RETURN_DATE, DEVICE_ID, USER_ID, STATUS FROM QGJ93840.REQUESTS FULL INNER JOIN QGJ93840.DEVICES USING (DEVICE_ID) JOIN QGJ93840.USER USING (USER_ID) WHERE STATUS ='+ "'" + params["STATUS"] + "' ORDER BY REQUEST_DATE LIMIT "+ offset + ", " + limit)
                     console.log('done');
                     return response.json({success:1, message:'Data Received!', data:data});
                 });
@@ -612,6 +613,36 @@ app.post('/getUserRequests', function(request, response){
                 });
             }
           });
+        }
+    });
+});
+
+
+app.post('/editRequest', function(request, response){
+    ibmdb.open(cn, async function (err,conn) {
+        console.log("posting")
+        if (err){
+            console.log(err)
+            return response.json({success:-1, message:err});
+        } else {
+            var params = request.body
+            var q = "INSERT INTO QGJ93840.USER" +
+                    " VALUES (Default, '"+params['username']+"', '"+params['password']+"', "+
+                    params['role']+")";
+            console.log(q);
+            conn.query(q, function (err, data) {
+            if (err){
+                console.log(err);
+                return response.json({success:-2, message:err});
+            }
+            else{
+                conn.close(function () {
+                    console.log('done');
+                    return response.json({success:1, message:'Data entered!'});
+                });
+            
+            }
+            });
         }
     });
 });
