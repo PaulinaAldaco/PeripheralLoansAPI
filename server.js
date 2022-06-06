@@ -626,7 +626,7 @@ app.post('/editUserInfo', function(request, response){
             return response.json({success:-1, message:err});
         } else {
             var params = request.body['user_params']
-            var q = "UPDATE INTO QGJ93840.USER SET "+params['column']+" = '"+params['change']+"' WHERE USER_ID = "+params['userID'];
+            var q = "UPDATE QGJ93840.USER SET "+params['column']+" = '"+params['change']+"' WHERE USER_ID = "+params['userID'];
             console.log(q);
             conn.query(q, function (err, data) {
             if (err){
