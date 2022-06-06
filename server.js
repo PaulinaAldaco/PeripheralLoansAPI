@@ -659,7 +659,6 @@ app.post('/editUserInfo', function(request, response){
             return response.json({success:-1, message:err});
         } else {
             var params = request.body['user_params']
-            console.log(body['user_params'])
             console.log(params['columns'])
             if(params['columns'] == "USERNAME"){
                 console.log("entro if 1")
