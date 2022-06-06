@@ -3,6 +3,7 @@ const express = require("express");
 const ibmdb = require("ibm_db");
 const async = require('async');
 const cors = require('cors');
+const bcrypt = require("bcrypt");
 
 const bodyParser=require('body-parser');
 
