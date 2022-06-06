@@ -618,7 +618,7 @@ app.post('/getUserRequests', function(request, response){
 });
 
 
-app.post('/editRequest', function(request, response){
+app.post('/editUserInfo', function(request, response){
     ibmdb.open(cn, async function (err,conn) {
         console.log("posting")
         if (err){
@@ -626,9 +626,7 @@ app.post('/editRequest', function(request, response){
             return response.json({success:-1, message:err});
         } else {
             var params = request.body
-            var q = "INSERT INTO QGJ93840.USER" +
-                    " VALUES (Default, '"+params['username']+"', '"+params['password']+"', "+
-                    params['role']+")";
+            var q = "UPDATE INTO QGJ93840.USER SET "+params['column']+" = '"+params['change']+"' WHERE USER_ID = "+params['userID'];
             console.log(q);
             conn.query(q, function (err, data) {
             if (err){
