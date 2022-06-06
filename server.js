@@ -659,10 +659,13 @@ app.post('/editUserInfo', function(request, response){
             return response.json({success:-1, message:err});
         } else {
             var params = request.body['user_params']
+            console.log(params['columns'])
             if(params['columns'] == "USERNAME" || params['columns'] == "PASSWORD"){
+                console.log("entro if 1")
                 var q = "UPDATE QGJ93840.USER SET "+params['column']+" = '"+params['change']+"' WHERE USER_ID = "+params['userID'];
             }else if(params['columns'] == "ROLE"){
                 var q = "UPDATE QGJ93840.USER SET "+params['column']+" = "+params['change']+" WHERE USER_ID = "+params['userID'];
+                console.log("if 2")
             }
             console.log(q);
             conn.query(q, function (err, data) {
