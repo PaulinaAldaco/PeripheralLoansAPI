@@ -50,27 +50,31 @@ ibmdb.open(cn, function (err,conn) {
 });
 
 
-app.get('/checkLogin', function(request, response){
+app.get('/checkLogin', function(request, response) {
     const { username, password } = request.query;
     ibmdb.open(cn, async function (err,conn) {
-        console.log("querying")
+        //console.log("querying")
         if (err){
             //return response.json({success:-1, message:err});
             console.log(err)
             return response.json({success:-1, message:err});
         } else {
-            conn.query(`SELECT * FROM QGJ93840.USER WHERE USERNAME = '${username}' and PASSWORD = '${password}'`, function (err, data) {
-            if (err){
-                console.log(err);
-                return response.json({success:-2, message:err});
-            }
-            else{
-                console.log(data)
-                conn.close(function () {
-                    return response.json({success:1, message:'Data Received!', data:data});
-                });
-            }
-          });
+            conn.query(`SELECT PASSWORD FROM QGJ93840.USER WHERE USERNAME = '${username}'`, async(err, data) =>{
+                if (err){
+                    console.log(err);
+                    return response.json({success:-2, message:err});
+                }
+                else{
+                    // encrypted password
+                    // console.log(data[0]['PASSWORD']);
+                    // check user password with hashed password stored in the database
+                    const validPassword = await bcrypt.compare(password, data[0]['PASSWORD']);
+                    // console.log(validPassword)
+                    conn.close(function () {
+                        return response.json({success:1, message:'Data Received!', data: {valid: validPassword}});
+                    });
+                }
+            });
         }
     });
 });
