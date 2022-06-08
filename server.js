@@ -68,10 +68,16 @@ app.get('/checkLogin', function(request, response) {
                     // encrypted password
                     // console.log(data[0]['PASSWORD']);
                     // check user password with hashed password stored in the database
-                    const validPassword = await bcrypt.compare(password, data[0]['PASSWORD']);
+                    if (data.length > 0) {
+                        var validPassword = await bcrypt.compare(password, data[0]['PASSWORD']);
+                    }
+                    else {
+                        var validPassword = false;
+                    }
+                    console.log(validPassword)
                     // console.log(validPassword)
                     conn.close(function () {
-                        if(valid){
+                        if(validPassword){
                             return response.json({success:1, message:'Data Received!', data: {valid: validPassword, USER_ID: data[0]['USER_ID'], USERNAME: data[0]['USERNAME'], ROLE: data[0]['ROLE']}});
                         }else{
                             return response.json({success:1, message:'Data Received!', data: {valid: validPassword}});
