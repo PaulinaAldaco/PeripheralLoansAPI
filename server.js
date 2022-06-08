@@ -736,10 +736,6 @@ app.post('/registerExit', function(request, response){
             
             // Build queries
             exitTime =  'UPDATE QGJ93840.DEVICES SET "Security_Auth" = 1, "in_campus" = 0, "last_exit_date" = CURRENT_TIMESTAMP, "device_state" = '+"'Checked Out'"+' WHERE DEVICE_ID = ' + params['device_id']
-            // update_in_camp=  'UPDATE QGJ93840.DEVICES SET  "in_campus" = 0 WHERE DEVICE_ID = ' + params['device_id']
-            // update_last_exit = 'UPDATE QGJ93840.DEVICES SET  "last_exit_date" = CURRENT_TIMESTAMP WHERE DEVICE_ID = ' + params['device_id']
-            // update_availability = 'UPDATE QGJ93840.DEVICES SET  "device_state" = '+"'Checked Out'"+' WHERE DEVICE_ID = ' + params['device_id']
-            // Create device requests
             conn.query(exitTime, function (err, data) {
                 if (err){
                     console.log(err);
@@ -753,6 +749,48 @@ app.post('/registerExit', function(request, response){
                     conn.close(function () {
                         console.log('done');
                         return response.json({success:1, message:'Data entered and updated!'});
+                    });
+                }
+            });
+        }
+    });
+});
+
+app.post('/registerReturn', function(request, response){
+    ibmdb.open(cn, async function (err,conn) {
+        console.log("posting")
+        if (err){
+            console.log(err)
+            return response.json({success:-1, message:err});
+        } else {
+            var params = request.body
+            console.log(params)
+            
+            // Build queries
+            returnTime =  'UPDATE QGJ93840.DEVICES SET "conditions_accepted" = 0, "Security_Auth" = 0, "in_campus" = 1, "last_admission_date" = CURRENT_TIMESTAMP, "device_state" = '+"'Available'"+' WHERE DEVICE_ID = ' + params['device_id']
+            update_REQ_status =  "UPDATE QGJ93840.REQUESTS SET STATUS = 'Finished' WHERE REQUEST_ID = (SELECT REQUEST_ID FROM QGJ93840.REQUESTS WHERE DEVICE_ID = "+params['request_id']+" AND STATUS = 'Accepted')"
+
+            conn.query(returnTime, function (err, data) {
+                if (err){
+                    console.log(err);
+                    return response.json({success:-2, message:err});
+                }
+                else{
+                    // conn.close(function () {
+                    console.log('done');
+                    //     //return response.json({success:1, message:'Data entered!'});
+                    // });
+                    conn.query(update_REQ_status, function (err, data) {
+                        if (err){
+                            console.log(err);
+                            return response.json({success:-2, message:err});
+                        }
+                        else{
+                            conn.close(function () {
+                                console.log('done');
+                                return response.json({success:1, message:'Data entered and updated!'});
+                            });
+                        }
                     });
                 }
             });
