@@ -733,7 +733,7 @@ app.post('/countPanelOut', function(request, response){
             return response.json({success:-1, message:err});
         } else {
             var params = request.body['days']
-            conn.query('SELECT COUNT(*) FROM QGJ93840.DEVICES WHERE "last_exit_date" BETWEEN CURRENT_DATE-'+params+' AND CURRENT_DATE+1)', function (err, data) {
+            conn.query('SELECT COUNT(*) FROM QGJ93840.DEVICES WHERE "last_exit_date" BETWEEN CURRENT_DATE-'+params+' AND CURRENT_DATE+1', function (err, data) {
                 if (err){
                 console.log(err);
                 return response.json({success:-2, message:err});
@@ -760,7 +760,7 @@ app.post('/countPanelIn', function(request, response){
             return response.json({success:-1, message:err});
         } else {
             var params = request.body['days']
-            conn.query('SELECT COUNT(*) FROM QGJ93840.DEVICES WHERE "last_admission_date" BETWEEN CURRENT_DATE-'+params+' AND CURRENT_DATE+1)', function (err, data) {
+            conn.query('SELECT COUNT(*) FROM QGJ93840.DEVICES WHERE "last_admission_date" BETWEEN CURRENT_DATE-'+params+' AND CURRENT_DATE+1', function (err, data) {
                 if (err){
                 console.log(err);
                 return response.json({success:-2, message:err});
