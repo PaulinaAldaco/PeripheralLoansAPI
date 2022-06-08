@@ -737,7 +737,7 @@ app.post('/registerExit', function(request, response){
             // Build queries
             change_Sec =  'UPDATE QGJ93840.DEVICES SET "Security_Auth" = 1 WHERE DEVICE_ID = ' + params['device_id']
             update_in_camp=  'UPDATE QGJ93840.DEVICES SET  "in_campus" = 0 WHERE DEVICE_ID = ' + params['device_id']
-            update_last_exit = 'UPDATE QGJ93840.DEVICES SET  ""last_exit_date" " = CURRENT_TIMESTAMP WHERE DEVICE_ID = ' + params['device_id']
+            update_last_exit = 'UPDATE QGJ93840.DEVICES SET  "last_exit_date" = CURRENT_TIMESTAMP WHERE DEVICE_ID = ' + params['device_id']
             update_availability = 'UPDATE QGJ93840.DEVICES SET  "device_state" = '+"'Checked Out'"+' WHERE DEVICE_ID = ' + params['device_id']
             // Create device requests
             conn.query(change_Sec, function (err, data) {
