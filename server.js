@@ -735,12 +735,12 @@ app.post('/registerExit', function(request, response){
             console.log(params)
             
             // Build queries
-            change_Sec =  'UPDATE QGJ93840.DEVICES SET "Security_Auth" = 1 WHERE DEVICE_ID = ' + params['device_id']
-            update_in_camp=  'UPDATE QGJ93840.DEVICES SET  "in_campus" = 0 WHERE DEVICE_ID = ' + params['device_id']
-            update_last_exit = 'UPDATE QGJ93840.DEVICES SET  "last_exit_date" = CURRENT_TIMESTAMP WHERE DEVICE_ID = ' + params['device_id']
-            update_availability = 'UPDATE QGJ93840.DEVICES SET  "device_state" = '+"'Checked Out'"+' WHERE DEVICE_ID = ' + params['device_id']
+            exitTime =  'UPDATE QGJ93840.DEVICES SET "Security_Auth" = 1, "in_campus" = 0, "last_exit_date" = CURRENT_TIMESTAMP, "device_state" = '+"'Checked Out'"+' WHERE DEVICE_ID = ' + params['device_id']
+            // update_in_camp=  'UPDATE QGJ93840.DEVICES SET  "in_campus" = 0 WHERE DEVICE_ID = ' + params['device_id']
+            // update_last_exit = 'UPDATE QGJ93840.DEVICES SET  "last_exit_date" = CURRENT_TIMESTAMP WHERE DEVICE_ID = ' + params['device_id']
+            // update_availability = 'UPDATE QGJ93840.DEVICES SET  "device_state" = '+"'Checked Out'"+' WHERE DEVICE_ID = ' + params['device_id']
             // Create device requests
-            conn.query(change_Sec, function (err, data) {
+            conn.query(exitTime, function (err, data) {
                 if (err){
                     console.log(err);
                     return response.json({success:-2, message:err});
@@ -750,33 +750,9 @@ app.post('/registerExit', function(request, response){
                     console.log('done');
                     //     //return response.json({success:1, message:'Data entered!'});
                     // });
-                    conn.query(update_in_camp, function (err, data) {
-                        if (err){
-                            console.log(err);
-                            return response.json({success:-2, message:err});
-                        }
-                        else{
-                            conn.query(update_last_exit, function (err, data) {
-                                if (err){
-                                    console.log(err);
-                                    return response.json({success:-2, message:err});
-                                }
-                                else{
-                                    conn.query(update_availability, function (err, data) {
-                                        if (err){
-                                            console.log(err);
-                                            return response.json({success:-2, message:err});
-                                        }
-                                        else{
-                                            conn.close(function () {
-                                                console.log('done');
-                                                return response.json({success:1, message:'Data entered and updated!'});
-                                            });
-                                        }
-                                    });
-                                }
-                            });
-                        }
+                    conn.close(function () {
+                        console.log('done');
+                        return response.json({success:1, message:'Data entered and updated!'});
                     });
                 }
             });
