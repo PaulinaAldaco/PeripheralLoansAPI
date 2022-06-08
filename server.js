@@ -715,7 +715,7 @@ app.get('/countDevicesPanel', function(request, response){
                 conn.close(function () {
                     console.log('done');
                     console.log(data)
-                    return response.json({success:1, message:'Data Received!', data:{"count": data[0]["1"]}});
+                    return response.json({success:1, message:'Data Received!', data:data});
                 });
             }
           });
