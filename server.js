@@ -715,7 +715,7 @@ app.get('/countDevicesPanel', function(request, response){
                 conn.close(function () {
                     console.log('done');
                     console.log(data)
-                    return response.json({success:1, message:'Data Received!', data:data});
+                    return response.json({success:1, message:'Data Received!', data:data[0]});
                 });
             }
           });
@@ -767,10 +767,10 @@ app.post('/registerExit', function(request, response){
                                         return response.json({success:1, message:'Data entered and updated!'});
                                     });
                                 }
-                         });
+                            });
                         }
                     });
-                 }
+                }
             });
         }
     });
