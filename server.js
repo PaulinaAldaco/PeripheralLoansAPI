@@ -768,7 +768,7 @@ app.post('/registerReturn', function(request, response){
             
             // Build queries
             returnTime =  'UPDATE QGJ93840.DEVICES SET "conditions_accepted" = 0, "Security_Auth" = 0, "in_campus" = 1, "last_admission_date" = CURRENT_TIMESTAMP, "device_state" = '+"'Available'"+' WHERE DEVICE_ID = ' + params['device_id']
-            update_REQ_status =  "UPDATE QGJ93840.REQUESTS SET STATUS = 'Finished' WHERE REQUEST_ID = (SELECT REQUEST_ID FROM QGJ93840.REQUESTS WHERE DEVICE_ID = "+params['request_id']+" AND STATUS = 'Accepted')"
+            update_REQ_status =  "UPDATE QGJ93840.REQUESTS SET STATUS = 'Finished' WHERE REQUEST_ID = (SELECT REQUEST_ID FROM QGJ93840.REQUESTS WHERE DEVICE_ID = "+params['device_id']+" AND STATUS = 'Accepted')"
 
             conn.query(returnTime, function (err, data) {
                 if (err){
