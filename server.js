@@ -59,7 +59,7 @@ app.get('/checkLogin', function(request, response) {
             console.log(err)
             return response.json({success:-1, message:err});
         } else {
-            conn.query(`SELECT PASSWORD FROM QGJ93840.USER WHERE USERNAME = '${username}'`, async(err, data) =>{
+            conn.query(`SELECT * FROM QGJ93840.USER WHERE USERNAME = '${username}'`, async(err, data) =>{
                 if (err){
                     console.log(err);
                     return response.json({success:-2, message:err});
@@ -71,7 +71,7 @@ app.get('/checkLogin', function(request, response) {
                     const validPassword = await bcrypt.compare(password, data[0]['PASSWORD']);
                     // console.log(validPassword)
                     conn.close(function () {
-                        return response.json({success:1, message:'Data Received!', data: {valid: validPassword}});
+                        return response.json({success:1, message:'Data Received!', data: {valid: validPassword, USER_ID: data[0]['USER_ID'], USERNAME: data[0]['USERNAME'], ROLE: data[0]['ROLE']}});
                     });
                 }
             });
