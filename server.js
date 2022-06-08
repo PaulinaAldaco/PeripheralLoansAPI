@@ -696,3 +696,29 @@ app.post('/editUserInfo', function(request, response){
         }
     });
 });
+
+app.get('/countDevicesPanel', function(request, response){
+    ibmdb.open(cn, async function (err,conn) {
+        console.log("querying")
+        if (err){
+            //return response.json({success:-1, message:err});
+            console.log("1")
+            console.log(err)
+            return response.json({success:-1, message:err});
+        } else {
+            conn.query('SELECT * FROM (SELECT COUNT (*) as devicesNo FROM QGJ93840.DEVICES), (SELECT COUNT(*) as devicesIn FROM QGJ93840.DEVICES WHERE "in_campus" = true), (SELECT COUNT(*) as devicesOut FROM QGJ93840.DEVICES WHERE "in_campus" = false);', function (err, data) {
+                if (err){
+                console.log(err);
+                return response.json({success:-2, message:err});
+            }
+            else{
+                conn.close(function () {
+                    console.log('done');
+                    console.log(data)
+                    return response.json({success:1, message:'Data Received!', data:{"count": data[0]["1"]}});
+                });
+            }
+          });
+        }
+    });
+});
