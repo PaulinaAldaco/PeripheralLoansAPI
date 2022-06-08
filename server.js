@@ -71,8 +71,12 @@ app.get('/checkLogin', function(request, response) {
                     const validPassword = await bcrypt.compare(password, data[0]['PASSWORD']);
                     // console.log(validPassword)
                     conn.close(function () {
-                        return response.json({success:1, message:'Data Received!', data: {valid: validPassword, USER_ID: data[0]['USER_ID'], USERNAME: data[0]['USERNAME'], ROLE: data[0]['ROLE']}});
-                    });
+                        if(valid){
+                            return response.json({success:1, message:'Data Received!', data: {valid: validPassword, USER_ID: data[0]['USER_ID'], USERNAME: data[0]['USERNAME'], ROLE: data[0]['ROLE']}});
+                        }else{
+                            return response.json({success:1, message:'Data Received!', data: {valid: validPassword}});
+                        }
+                });
                 }
             });
         }
