@@ -3,6 +3,7 @@ const express = require("express");
 const ibmdb = require("ibm_db");
 const async = require('async');
 const cors = require('cors');
+const bcrypt = require("bcrypt");
 
 const bodyParser=require('body-parser');
 
@@ -49,32 +50,49 @@ ibmdb.open(cn, function (err,conn) {
 });
 
 
-app.get('/checkLogin', function(request, response){
+app.get('/checkLogin', function(request, response) {
     const { username, password } = request.query;
     ibmdb.open(cn, async function (err,conn) {
-        console.log("querying")
+        //console.log("querying")
         if (err){
             //return response.json({success:-1, message:err});
             console.log(err)
             return response.json({success:-1, message:err});
         } else {
-            conn.query(`SELECT * FROM QGJ93840.USER WHERE USERNAME = '${username}' and PASSWORD = '${password}'`, function (err, data) {
-            if (err){
-                console.log(err);
-                return response.json({success:-2, message:err});
-            }
-            else{
-                console.log(data)
-                conn.close(function () {
-                    return response.json({success:1, message:'Data Received!', data:data});
+            conn.query(`SELECT * FROM QGJ93840.USER WHERE USERNAME = '${username}'`, async(err, data) =>{
+                if (err){
+                    console.log(err);
+                    return response.json({success:-2, message:err});
+                }
+                else{
+                    // encrypted password
+                    // console.log(data[0]['PASSWORD']);
+                    // check user password with hashed password stored in the database
+                    if (data.length > 0) {
+                        var validPassword = await bcrypt.compare(password, data[0]['PASSWORD']);
+                    }
+                    else {
+                        var validPassword = false;
+                    }
+                    console.log(validPassword)
+                    // console.log(validPassword)
+                    conn.close(function () {
+                        if(validPassword){
+                            return response.json({success:1, message:'Data Received!', data: {valid: validPassword, USER_ID: data[0]['USER_ID'], USERNAME: data[0]['USERNAME'], ROLE: data[0]['ROLE']}});
+                        }else{
+                            return response.json({success:1, message:'Data Received!', data: {valid: validPassword}});
+                        }
                 });
-            }
-          });
+                }
+            });
         }
     });
 });
 
-app.get('/users', function(request, response){
+app.post('/users', function(request, response){
+    var params = request.body
+    var limit = params['limit']
+    var offset = (params['page']-1) * limit
     ibmdb.open(cn, async function (err,conn) {
         console.log("querying")
         if (err){
@@ -83,7 +101,7 @@ app.get('/users', function(request, response){
             console.log(err)
             return response.json({success:-1, message:err});
         } else {
-            conn.query(`SELECT * FROM QGJ93840.USER`, function (err, data) {
+            conn.query('SELECT USER_ID, USERNAME, ROLE FROM QGJ93840.USER LIMIT '+ offset + "," + limit, function (err, data) {
             if (err){
                 console.log(err);
                 return response.json({success:-2, message:err});
@@ -99,6 +117,33 @@ app.get('/users', function(request, response){
     });
 });
 
+app.get('/countUsers', function(request, response){
+    ibmdb.open(cn, async function (err,conn) {
+        console.log("querying")
+        if (err){
+            //return response.json({success:-1, message:err});
+            console.log("1")
+            console.log(err)
+            return response.json({success:-1, message:err});
+        } else {
+            conn.query("SELECT COUNT(*) FROM QGJ93840.USER", function (err, data) {
+                if (err){
+                console.log(err);
+                return response.json({success:-2, message:err});
+            }
+            else{
+                conn.close(function () {
+                    console.log('done');
+                    console.log(data)
+                    return response.json({success:1, message:'Data Received!', data:{"count": data[0]["1"]}});
+                });
+            }
+          });
+        }
+    });
+});
+
+
 app.post('/newPeripheral', function(request, response){
     ibmdb.open(cn, async function (err,conn) {
         console.log("posting")
@@ -109,7 +154,7 @@ app.post('/newPeripheral', function(request, response){
             var params = request.body['device_params']
             var q = "INSERT INTO QGJ93840.DEVICES" +
                     " VALUES (DEFAULT, '" + params['device_type'] + "', '" + params['brand'] + "', '" +
-                    params['model'] + "', " + params['serial_number'] + ", DEFAULT, DEFAULT, DEFAULT, DEFAULT )";
+                    params['model'] + "', " + params['serial_number'] + ", DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT)";
             console.log(q);
             conn.query(q, function (err, data) {
             if (err){
@@ -185,6 +230,71 @@ app.get('/countDevices', function(request, response){
     });
 });
 
+app.post('/userToID', function(request, response){
+    ibmdb.open(cn, async function (err,conn) {
+        console.log("posting")
+        if (err){
+            console.log(err)
+            return response.json({success:-1, message:err});
+        } else {
+            var params = request.body
+            console.log(params)
+            
+            // Build query
+            q = "SELECT USER_ID FROM QGJ93840.USER WHERE USERNAME = " + "'" + params['username'] +"';";
+
+            console.log(q);
+
+            conn.query(q, function (err, data) {
+                if (err){
+                    console.log(err);
+                    return response.json({success:-2, message:err});
+                }
+                else{
+                    conn.close(function () {
+                        console.log('done');
+                        console.log(data)
+                        return response.json({success:1, message:'Data received!', data: data});
+                    });
+                }
+            });
+        }
+    });
+});
+
+app.post('/IDTouser', function(request, response){
+    ibmdb.open(cn, async function (err,conn) {
+        console.log("posting")
+        if (err){
+            console.log(err)
+            return response.json({success:-1, message:err});
+        } else {
+            var params = request.body
+            console.log(params)
+            
+            // Build query
+            q = "SELECT USERNAME FROM QGJ93840.USER WHERE USER_ID = " + params['id'] +";";
+
+            console.log(q);
+
+            conn.query(q, function (err, data) {
+                if (err){
+                    console.log(err);
+                    return response.json({success:-2, message:err});
+                }
+                else{
+                    conn.close(function () {
+                        console.log('done');
+                        console.log(data)
+                        return response.json({success:1, message:'Data received!', data: data});
+                    });
+                }
+            });
+        }
+    });
+});
+
+
 app.post('/newRequest', function(request, response){
     ibmdb.open(cn, async function (err,conn) {
         console.log("posting")
@@ -197,12 +307,12 @@ app.post('/newRequest', function(request, response){
             
             // Build queries
             request_query = "INSERT INTO QGJ93840.REQUESTS VALUES"
-            device_query =  "UPDATE QGJ93840.DEVICES SET " + '"device_state"' + " = 'Requested' WHERE id IN ("
+            device_query =  "UPDATE QGJ93840.DEVICES SET " + '"device_state"' + " = 'Requested' WHERE DEVICE_ID IN ("
             for (let i = 0; i < params.length-1; i++) {
                 var request_query = 
                         request_query + "(DEFAULT, " + params[i]['user_id'] + "," +
                         params[i]['device_id'] +
-                        ", DEFAULT, DEFAULT),";
+                        ", DEFAULT, TIMESTAMP_FORMAT(" +"'"+params[i]['return_date']+"', 'YYYY-MM-DD HH24:MI:SS'), DEFAULT),";
                 var device_query = 
                         device_query + params[i]['device_id'] + ', '
 
@@ -210,7 +320,7 @@ app.post('/newRequest', function(request, response){
             var request_query = 
                     request_query + "(DEFAULT, " + params[params.length-1]['user_id'] + "," +
                     params[params.length-1]['device_id'] +
-                    ", DEFAULT, DEFAULT);";
+                    ", DEFAULT, TIMESTAMP_FORMAT(" +"'"+params[params.length-1]['return_date']+"', 'YYYY-MM-DD HH24:MI:SS'), DEFAULT)";
             var device_query = device_query + params[params.length-1]['device_id'] + ');'
             console.log(request_query);
             console.log(device_query);
@@ -222,26 +332,27 @@ app.post('/newRequest', function(request, response){
                     return response.json({success:-2, message:err});
                 }
                 else{
-                    conn.close(function () {
-                        console.log('done');
-                        //return response.json({success:1, message:'Data entered!'});
+                    // conn.close(function () {
+                    console.log('done');
+                    //     //return response.json({success:1, message:'Data entered!'});
+                    // });
+                    conn.query(device_query, function (err, data) {
+                        if (err){
+                            console.log(err);
+                            return response.json({success:-2, message:err});
+                        }
+                        else{
+                            conn.close(function () {
+                                console.log('done');
+                                return response.json({success:1, message:'Data entered and updated!'});
+                            });
+                        }
                     });
                 }
             });
 
             // Update device states
-            conn.query(device_query, function (err, data) {
-                if (err){
-                    console.log(err);
-                    return response.json({success:-2, message:err});
-                }
-                else{
-                    conn.close(function () {
-                        console.log('done');
-                        return response.json({success:1, message:'Data entered and updated!'});
-                    });
-                }
-            });
+            
         }
     });
 });
@@ -257,7 +368,7 @@ app.post('/checkDeviceAvailability', function(request, response){
             console.log(params)
             
             // Build query
-            q = 'SELECT "ID","device_state" FROM QGJ93840.DEVICES WHERE "ID" IN ('
+            q = 'SELECT "DEVICE_ID", "serial_number", "device_state" FROM QGJ93840.DEVICES WHERE "DEVICE_ID" IN ('
             for (let i = 0; i < params.length-1; i++) {
                 var q = q + params[i]['device_id'] + ",";
             }
@@ -276,17 +387,23 @@ app.post('/checkDeviceAvailability', function(request, response){
                         console.log(data)
                         var avail = []
                         var unavail = []
+                        var avail_SN = []
+                        var unavail_SN = []
                         for (let i = 0; i < params.length; i++) {
                             if (data[i]["device_state"] == "Available") {
-                                avail.push(data[i]["ID"])
+                                avail.push(data[i]["DEVICE_ID"])
+                                avail_SN.push(data[i]["serial_number"])
                             }
                             else {
-                                unavail.push(data[i]["ID"])
+                                unavail.push(data[i]["DEVICE_ID"])
+                                unavail_SN.push(data[i]["serial_number"])
                             }
                         }
                         res = {
+                            "available_SN": avail_SN,
                             "available": avail,
-                            "unavailable": unavail
+                            "unavailable": unavail,
+                            "unavailable_SN": unavail_SN
                         }
                         console.log(res)
                         return response.json({success:1, message:'Data received!', data: res});
@@ -324,20 +441,412 @@ app.post('/checkDeviceAvailability', function(request, response){
             console.log(err)
             return response.json({success:-1, message:err});
         } else {
-            conn.query("SELECT * FROM QGJ93840.DEVICES WHERE ID = "+ params["deviceID"] + ";", function (err, data) {
+            conn.query("SELECT * FROM QGJ93840.DEVICES WHERE DEVICE_ID = "+ params["deviceID"] + ";", function (err, data) {
                 if (err){
                 console.log(err);
                 return response.json({success:-2, message:err});
             }
             else{
                 conn.close(function () {
-                    console.log("Using query: SELECT * FROM QGJ93840.DEVICES WHERE ID = "+ params["deviceID"] + ";")
+                    console.log("Using query: SELECT * FROM QGJ93840.DEVICES WHERE DEVICE_ID = "+ params["deviceID"] + ";")
                     console.log('done');
                     // console.log(data)
                     return response.json({success:1, message:'Data Received!', data:data});
                 });
             }
           });
+        }
+    });
+});
+
+app.post('/getRequests', function(request, response){
+    var params = request.body
+    var limit = params['limit']
+    var offset = (params['page']-1) * limit
+    // var limit = 10
+    // var offset = (1-1) * limit
+    ibmdb.open(cn, async function (err,conn) {
+        console.log("querying")
+        if (err){
+            //return response.json({success:-1, message:err});
+            console.log("1")
+            console.log(err)
+            return response.json({success:-1, message:err});
+        } else {
+            conn.query('SELECT REQUEST_ID, USERNAME, "device_type", "brand", "model", "serial_number", "device_state", "conditions_accepted", "in_campus", "Security_Auth", "last_admission_date", "last_exit_date", DATE as REQUEST_DATE,  RETURN_DATE, DEVICE_ID, USER_ID, STATUS FROM QGJ93840.REQUESTS FULL INNER JOIN QGJ93840.DEVICES USING (DEVICE_ID) JOIN QGJ93840.USER USING (USER_ID) WHERE STATUS ='+ "'" + params["STATUS"] + "' ORDER BY REQUEST_DATE LIMIT " + offset + ", " + limit, function (err, data) {
+                if (err){
+                console.log(err);
+                return response.json({success:-2, message:err});
+            }
+            else{
+                conn.close(function () {
+                    console.log('Using query: SELECT REQUEST_ID, USERNAME, "device_type", "brand", "model", "serial_number", "device_state", "conditions_accepted", "in_campus", "Security_Auth", "last_admission_date", "last_exit_date", DATE as REQUEST_DATE,  RETURN_DATE, DEVICE_ID, USER_ID, STATUS FROM QGJ93840.REQUESTS FULL INNER JOIN QGJ93840.DEVICES USING (DEVICE_ID) JOIN QGJ93840.USER USING (USER_ID) WHERE STATUS ='+ "'" + params["STATUS"] + "' ORDER BY REQUEST_DATE LIMIT "+ offset + ", " + limit)
+                    console.log('done');
+                    return response.json({success:1, message:'Data Received!', data:data});
+                });
+            }
+          });
+        }
+    });
+});
+
+app.post('/countRequests', function(request, response){
+    ibmdb.open(cn, async function (err,conn) {
+        console.log("querying")
+        var params = request.body
+        if (err){
+            //return response.json({success:-1, message:err});
+            console.log("1")
+            console.log(err)
+            return response.json({success:-1, message:err});
+        } else {
+            conn.query("SELECT COUNT(*) FROM QGJ93840.REQUESTS WHERE STATUS = '"+ params["STATUS"]+"'", function (err, data) {
+                if (err){
+                console.log(err);
+                return response.json({success:-2, message:err});
+            }
+            else{
+                conn.close(function () {
+                    console.log('done');
+                    console.log(data)
+                    return response.json({success:1, message:'Data Received!', data:{"count": data[0]["1"]}});
+                });
+            }
+          });
+        }
+    });
+});
+
+app.post('/acceptRequest', function(request, response){
+    ibmdb.open(cn, async function (err,conn) {
+        console.log("posting")
+        if (err){
+            console.log(err)
+            return response.json({success:-1, message:err});
+        } else {
+            var params = request.body
+            console.log(params)
+            
+            // Build queries
+            change_accepted_Con =  'UPDATE QGJ93840.DEVICES SET "conditions_accepted" = 1 WHERE DEVICE_ID = ' + params['device_id']
+            update_REQ_status =  "UPDATE QGJ93840.REQUESTS SET STATUS = 'Accepted' WHERE REQUEST_ID = " + params['request_id']
+
+
+            // Create device requests
+            conn.query(change_accepted_Con, function (err, data) {
+                if (err){
+                    console.log(err);
+                    return response.json({success:-2, message:err});
+                }
+                else{
+                    // conn.close(function () {
+                    console.log('done');
+                    //     //return response.json({success:1, message:'Data entered!'});
+                    // });
+                    conn.query(update_REQ_status, function (err, data) {
+                        if (err){
+                            console.log(err);
+                            return response.json({success:-2, message:err});
+                        }
+                        else{
+                            conn.close(function () {
+                                console.log('done');
+                                return response.json({success:1, message:'Data entered and updated!'});
+                            });
+                        }
+                    });
+                }
+            });
+        }
+    });
+});
+
+
+app.post('/rejectRequest', function(request, response){
+    ibmdb.open(cn, async function (err,conn) {
+        console.log("posting")
+        if (err){
+            console.log(err)
+            return response.json({success:-1, message:err});
+        } else {
+            var params = request.body
+            console.log(params)
+            
+            // Build queries
+            change_device_State =  'UPDATE QGJ93840.DEVICES SET "device_state" = '+"'Available'"+' WHERE DEVICE_ID = ' + params['device_id']
+            update_REQ_status =  "UPDATE QGJ93840.REQUESTS SET STATUS = 'Denied' WHERE REQUEST_ID = " + params['request_id']
+
+
+            // Create device requests
+            conn.query(update_REQ_status, function (err, data) {
+                if (err){
+                    console.log(err);
+                    return response.json({success:-2, message:err});
+                }
+                else{
+                    // conn.close(function () {
+                    console.log('done');
+                    //     //return response.json({success:1, message:'Data entered!'});
+                    // });
+                    conn.query(change_device_State, function (err, data) {
+                        if (err){
+                            console.log(err);
+                            return response.json({success:-2, message:err});
+                        }
+                        else{
+                            conn.close(function () {
+                                console.log('done');
+                                return response.json({success:1, message:'Data entered and updated!'});
+                            });
+                        }
+                    });
+                }
+            });
+        }
+    });
+});
+
+app.post('/newUser', function(request, response){
+    ibmdb.open(cn, async function (err,conn) {
+        console.log("posting")
+        if (err){
+            console.log(err)
+            return response.json({success:-1, message:err});
+        } else {
+            var params = request.body['user_params']
+            var q = "INSERT INTO QGJ93840.USER" +
+                    " VALUES (Default, '"+params['username']+"', '"+params['password']+"', "+
+                    params['role']+")";
+            console.log(q);
+            conn.query(q, function (err, data) {
+            if (err){
+                console.log(err);
+                return response.json({success:-2, message:err});
+            }
+            else{
+                conn.close(function () {
+                    console.log('done');
+                    return response.json({success:1, message:'Data entered!'});
+                });
+            
+            }
+          });
+        }
+    });
+});
+
+app.post('/getUserRequests', function(request, response){
+    var params = request.body
+
+    ibmdb.open(cn, async function (err,conn) {
+        console.log("querying")
+        if (err){
+            //return response.json({success:-1, message:err});
+            console.log("1")
+            console.log(err)
+            return response.json({success:-1, message:err});
+        } else {
+            conn.query('SELECT REQUEST_ID, "device_type", "brand", "model", "serial_number", "device_state", "conditions_accepted", "in_campus", "Security_Auth", "last_admission_date", "last_exit_date", DATE as REQUEST_DATE,  RETURN_DATE, DEVICE_ID, STATUS FROM QGJ93840.REQUESTS FULL INNER JOIN QGJ93840.DEVICES USING (DEVICE_ID) WHERE STATUS = '+"'Accepted'"+ 'AND USER_ID ='+  params["userID"], function (err, data) {
+            // conn.query("SELECT * FROM QGJ93840.REQUESTS WHERE STATUS = 'Accepted' AND USER_ID = "+ params["userID"] + ";", function (err, data) {
+                if (err){
+                console.log(err);
+                return response.json({success:-2, message:err});
+            }
+            else{
+                conn.close(function () {
+                    console.log('Using query: SELECT REQUEST_ID, "device_type", "brand", "model", "serial_number", "device_state", "conditions_accepted", "in_campus", "Security_Auth", "last_admission_date", "last_exit_date", DATE as REQUEST_DATE,  RETURN_DATE, DEVICE_ID, STATUS FROM QGJ93840.REQUESTS FULL INNER JOIN QGJ93840.DEVICES USING (DEVICE_ID) WHERE STATUS = '+"'Accepted'"+ 'AND USER_ID ='+  params["userID"])
+                    console.log('done');
+                    // console.log(data)
+                    return response.json({success:1, message:'Data Received!', data:data});
+                });
+            }
+          });
+        }
+    });
+});
+
+
+app.post('/editUserInfo', function(request, response){
+    ibmdb.open(cn, async function (err,conn) {
+        console.log("posting")
+        if (err){
+            console.log(err)
+            return response.json({success:-1, message:err});
+        } else {
+            var params = request.body['user_params']
+            if(params['column'] == "USERNAME" || params['column'] == "PASSWORD"){
+                var q = "UPDATE QGJ93840.USER SET "+params['column']+" = '"+params['change']+"' WHERE USER_ID = "+params['userID'];
+            }else if(params['column'] == "ROLE"){
+                var q = "UPDATE QGJ93840.USER SET "+params['column']+" = "+params['change']+" WHERE USER_ID = "+params['userID'];
+            }
+            console.log(q);
+            conn.query(q, function (err, data) {
+            if (err){
+                console.log(err);
+                return response.json({success:-2, message:err});
+            }
+            else{
+                conn.close(function () {
+                    console.log('done');
+                    return response.json({success:1, message:'Data entered!'});
+                });
+            
+            }
+            });
+        }
+    });
+});
+
+app.get('/countDevicesPanel', function(request, response){
+    ibmdb.open(cn, async function (err,conn) {
+        console.log("posting")
+        if (err){
+            //return response.json({success:-1, message:err});
+            console.log("1")
+            console.log(err)
+            return response.json({success:-1, message:err});
+        } else {
+            conn.query('SELECT * FROM (SELECT COUNT (*) as devicesNo FROM QGJ93840.DEVICES), (SELECT COUNT(*) as devicesIn FROM QGJ93840.DEVICES WHERE "in_campus" = true), (SELECT COUNT(*) as devicesOut FROM QGJ93840.DEVICES WHERE "in_campus" = false);', function (err, data) {
+                if (err){
+                console.log(err);
+                return response.json({success:-2, message:err});
+            }
+            else{
+                conn.close(function () {
+                    console.log('done');
+                    console.log(data)
+                    return response.json({success:1, message:'Data Received!', data:data[0]});
+                });
+            }
+          });
+        }
+    });
+});
+
+app.post('/countPanelOut', function(request, response){
+    ibmdb.open(cn, async function (err,conn) {
+        console.log("querying")
+        if (err){
+            //return response.json({success:-1, message:err});
+            console.log("1")
+            console.log(err)
+            return response.json({success:-1, message:err});
+        } else {
+            var params = request.body['days']
+            conn.query('SELECT COUNT(*) FROM QGJ93840.DEVICES WHERE "last_exit_date" BETWEEN CURRENT_DATE-'+params+' AND CURRENT_DATE+1', function (err, data) {
+                if (err){
+                console.log(err);
+                return response.json({success:-2, message:err});
+            }
+            else{
+                conn.close(function () {
+                    console.log('done');
+                    console.log(data)
+                    return response.json({success:1, message:'Data Received!', data:data[0]});
+                });
+            }
+          });
+        }
+    });
+});
+
+app.post('/countPanelIn', function(request, response){
+    ibmdb.open(cn, async function (err,conn) {
+        console.log("querying")
+        if (err){
+            //return response.json({success:-1, message:err});
+            console.log("1")
+            console.log(err)
+            return response.json({success:-1, message:err});
+        } else {
+            var params = request.body['days']
+            conn.query('SELECT COUNT(*) FROM QGJ93840.DEVICES WHERE "last_admission_date" BETWEEN CURRENT_DATE-'+params+' AND CURRENT_DATE+1', function (err, data) {
+                if (err){
+                console.log(err);
+                return response.json({success:-2, message:err});
+            }
+            else{
+                conn.close(function () {
+                    console.log('done');
+                    console.log(data)
+                    return response.json({success:1, message:'Data Received!', data:data[0]});
+                });
+            }
+          });
+        }
+    });
+});
+
+app.post('/registerExit', function(request, response){
+    ibmdb.open(cn, async function (err,conn) {
+        console.log("posting")
+        if (err){
+            console.log(err)
+            return response.json({success:-1, message:err});
+        } else {
+            var params = request.body
+            console.log(params)
+            
+            // Build queries
+            exitTime =  'UPDATE QGJ93840.DEVICES SET "Security_Auth" = 1, "in_campus" = 0, "last_exit_date" = CURRENT_TIMESTAMP, "device_state" = '+"'Checked Out'"+' WHERE DEVICE_ID = ' + params['device_id']
+            conn.query(exitTime, function (err, data) {
+                if (err){
+                    console.log(err);
+                    return response.json({success:-2, message:err});
+                }
+                else{
+                    // conn.close(function () {
+                    console.log('done');
+                    //     //return response.json({success:1, message:'Data entered!'});
+                    // });
+                    conn.close(function () {
+                        console.log('done');
+                        return response.json({success:1, message:'Data entered and updated!'});
+                    });
+                }
+            });
+        }
+    });
+});
+
+app.post('/registerReturn', function(request, response){
+    ibmdb.open(cn, async function (err,conn) {
+        console.log("posting")
+        if (err){
+            console.log(err)
+            return response.json({success:-1, message:err});
+        } else {
+            var params = request.body
+            console.log(params)
+            
+            // Build queries
+            returnTime =  'UPDATE QGJ93840.DEVICES SET "conditions_accepted" = 0, "Security_Auth" = 0, "in_campus" = 1, "last_admission_date" = CURRENT_TIMESTAMP, "device_state" = '+"'Available'"+' WHERE DEVICE_ID = ' + params['device_id']
+            update_REQ_status =  "UPDATE QGJ93840.REQUESTS SET STATUS = 'Finished' WHERE REQUEST_ID = (SELECT REQUEST_ID FROM QGJ93840.REQUESTS WHERE DEVICE_ID = "+params['device_id']+" AND STATUS = 'Accepted')"
+
+            conn.query(returnTime, function (err, data) {
+                if (err){
+                    console.log(err);
+                    return response.json({success:-2, message:err});
+                }
+                else{
+                    // conn.close(function () {
+                    console.log('done');
+                    //     //return response.json({success:1, message:'Data entered!'});
+                    // });
+                    conn.query(update_REQ_status, function (err, data) {
+                        if (err){
+                            console.log(err);
+                            return response.json({success:-2, message:err});
+                        }
+                        else{
+                            conn.close(function () {
+                                console.log('done');
+                                return response.json({success:1, message:'Data entered and updated!'});
+                            });
+                        }
+                    });
+                }
+            });
         }
     });
 });
