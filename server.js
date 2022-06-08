@@ -699,7 +699,7 @@ app.post('/editUserInfo', function(request, response){
 
 app.get('/countDevicesPanel', function(request, response){
     ibmdb.open(cn, async function (err,conn) {
-        console.log("querying")
+        console.log("posting")
         if (err){
             //return response.json({success:-1, message:err});
             console.log("1")
@@ -723,6 +723,59 @@ app.get('/countDevicesPanel', function(request, response){
     });
 });
 
+app.post('/countPanelOut', function(request, response){
+    ibmdb.open(cn, async function (err,conn) {
+        console.log("querying")
+        if (err){
+            //return response.json({success:-1, message:err});
+            console.log("1")
+            console.log(err)
+            return response.json({success:-1, message:err});
+        } else {
+            var params = request.body['days']
+            conn.query('SELECT COUNT(*) FROM QGJ93840.DEVICES WHERE "last_exit_date" BETWEEN CURRENT_DATE-'+params+' AND CURRENT_DATE+1)', function (err, data) {
+                if (err){
+                console.log(err);
+                return response.json({success:-2, message:err});
+            }
+            else{
+                conn.close(function () {
+                    console.log('done');
+                    console.log(data)
+                    return response.json({success:1, message:'Data Received!', data:data[0]});
+                });
+            }
+          });
+        }
+    });
+});
+
+app.post('/countPanelIn', function(request, response){
+    ibmdb.open(cn, async function (err,conn) {
+        console.log("querying")
+        if (err){
+            //return response.json({success:-1, message:err});
+            console.log("1")
+            console.log(err)
+            return response.json({success:-1, message:err});
+        } else {
+            var params = request.body['days']
+            conn.query('SELECT COUNT(*) FROM QGJ93840.DEVICES WHERE "last_admission_date" BETWEEN CURRENT_DATE-'+params+' AND CURRENT_DATE+1)', function (err, data) {
+                if (err){
+                console.log(err);
+                return response.json({success:-2, message:err});
+            }
+            else{
+                conn.close(function () {
+                    console.log('done');
+                    console.log(data)
+                    return response.json({success:1, message:'Data Received!', data:data[0]});
+                });
+            }
+          });
+        }
+    });
+});
 
 app.post('/registerExit', function(request, response){
     ibmdb.open(cn, async function (err,conn) {
