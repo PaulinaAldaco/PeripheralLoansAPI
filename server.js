@@ -676,11 +676,11 @@ app.post('/editUserInfo', function(request, response){
             var params = request.body['user_params']
             var change = params['change']
             if (params['column'] == "PASSWORD") {
-                if (data.length > 0) {
+                if (change.length > 0) {
                     // generate salt to hash password
                     const salt = await bcrypt.genSalt(10);
                     // generate hashed password
-                    const hashed_pass = await bcrypt.hash(pass, salt);
+                    const hashed_pass = await bcrypt.hash(change, salt);
                     change = "'" + hashed_pass + "'"
                 }
                 else {
@@ -688,7 +688,7 @@ app.post('/editUserInfo', function(request, response){
                 }
             }
             else if(params['column'] == "USERNAME"){
-                change = "'" + hashed_pass + "'"
+                change = "'" + change + "'"
             }
             var q = "UPDATE QGJ93840.USER SET " + params['column'] + " = " + change +
                     " WHERE USER_ID = " + params['userID'];
