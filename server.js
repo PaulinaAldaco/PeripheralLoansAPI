@@ -674,11 +674,25 @@ app.post('/editUserInfo', function(request, response){
             return response.json({success:-1, message:err});
         } else {
             var params = request.body['user_params']
-            if(params['column'] == "USERNAME" || params['column'] == "PASSWORD"){
-                var q = "UPDATE QGJ93840.USER SET "+params['column']+" = '"+params['change']+"' WHERE USER_ID = "+params['userID'];
-            }else if(params['column'] == "ROLE"){
-                var q = "UPDATE QGJ93840.USER SET "+params['column']+" = "+params['change']+" WHERE USER_ID = "+params['userID'];
+            var change = params['change']
+            if (params['column'] == "PASSWORD") {
+                if (data.length > 0) {
+                    // generate salt to hash password
+                    const salt = await bcrypt.genSalt(10);
+                    // generate hashed password
+                    const hashed_pass = await bcrypt.hash(pass, salt);
+                    change = "'" + hashed_pass + "'"
+                }
+                else {
+                    return response.json({success:-2, message:"Passwords must not be empty"});
+                }
             }
+            else if(params['column'] == "USERNAME"){
+                change = "'" + hashed_pass + "'"
+            }
+            var q = "UPDATE QGJ93840.USER SET " + params['column'] + " = " + change +
+                    " WHERE USER_ID = " + params['userID'];
+
             console.log(q);
             conn.query(q, function (err, data) {
             if (err){
