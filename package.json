@@ -18,9 +18,7 @@
     "cors": "^2.8.5",
     "express": "^4.17.3",
     "ibm_db": "^2.8.1",
-    "mocha": "^10.0.0"
-  },
-  "devDependencies": {
+    "mocha": "^10.0.0",
     "dotenv": "^16.0.0",
     "nodemon": "^2.0.16"
   },

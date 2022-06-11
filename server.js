@@ -36,7 +36,7 @@ ibmdb.open(cn, function (err,conn) {
         console.log("1")
         console.log(err)
     }
-    conn.query("SELECT * FROM QGJ93840.USER ", function (err, data) {
+    conn.query("SELECT * FROM USER ", function (err, data) {
         if (err){
             //return response.json({success:-2, message:err});
             console.log("2")
@@ -59,7 +59,7 @@ app.get('/checkLogin', function(request, response) {
             console.log(err)
             return response.json({success:-1, message:err});
         } else {
-            conn.query(`SELECT * FROM QGJ93840.USER WHERE USERNAME = '${username}'`, async(err, data) =>{
+            conn.query(`SELECT * FROM USER WHERE USERNAME = '${username}'`, async(err, data) =>{
                 if (err){
                     console.log(err);
                     return response.json({success:-2, message:err});
@@ -101,7 +101,7 @@ app.post('/users', function(request, response){
             console.log(err)
             return response.json({success:-1, message:err});
         } else {
-            conn.query('SELECT USER_ID, USERNAME, ROLE FROM QGJ93840.USER LIMIT '+ offset + "," + limit, function (err, data) {
+            conn.query('SELECT USER_ID, USERNAME, ROLE FROM USER LIMIT '+ offset + "," + limit, function (err, data) {
             if (err){
                 console.log(err);
                 return response.json({success:-2, message:err});
@@ -126,7 +126,7 @@ app.get('/countUsers', function(request, response){
             console.log(err)
             return response.json({success:-1, message:err});
         } else {
-            conn.query("SELECT COUNT(*) FROM QGJ93840.USER", function (err, data) {
+            conn.query("SELECT COUNT(*) FROM USER", function (err, data) {
                 if (err){
                 console.log(err);
                 return response.json({success:-2, message:err});
@@ -152,7 +152,7 @@ app.post('/newPeripheral', function(request, response){
             return response.json({success:-1, message:err});
         } else {
             var params = request.body['device_params']
-            var q = "INSERT INTO QGJ93840.DEVICES" +
+            var q = "INSERT INTO DEVICES" +
                     " VALUES (DEFAULT, '" + params['device_type'] + "', '" + params['brand'] + "', '" +
                     params['model'] + "', " + params['serial_number'] + ", DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT, DEFAULT)";
             console.log(q);
@@ -187,14 +187,14 @@ app.post('/getDevices', function(request, response){
             console.log(err)
             return response.json({success:-1, message:err});
         } else {
-            conn.query("SELECT * FROM QGJ93840.DEVICES LIMIT "+ offset + "," + limit, function (err, data) {
+            conn.query("SELECT * FROM DEVICES LIMIT "+ offset + "," + limit, function (err, data) {
                 if (err){
                 console.log(err);
                 return response.json({success:-2, message:err});
             }
             else{
                 conn.close(function () {
-                    console.log("Using query: SELECT * FROM QGJ93840.DEVICES LIMIT "+ offset + "," + limit)
+                    console.log("Using query: SELECT * FROM DEVICES LIMIT "+ offset + "," + limit)
                     console.log('done');
                     return response.json({success:1, message:'Data Received!', data:data});
                 });
@@ -213,7 +213,7 @@ app.get('/countDevices', function(request, response){
             console.log(err)
             return response.json({success:-1, message:err});
         } else {
-            conn.query("SELECT COUNT(*) FROM QGJ93840.DEVICES", function (err, data) {
+            conn.query("SELECT COUNT(*) FROM DEVICES", function (err, data) {
                 if (err){
                 console.log(err);
                 return response.json({success:-2, message:err});
@@ -241,7 +241,7 @@ app.post('/userToID', function(request, response){
             console.log(params)
             
             // Build query
-            q = "SELECT USER_ID FROM QGJ93840.USER WHERE USERNAME = " + "'" + params['username'] +"';";
+            q = "SELECT USER_ID FROM USER WHERE USERNAME = " + "'" + params['username'] +"';";
 
             console.log(q);
 
@@ -273,7 +273,7 @@ app.post('/IDTouser', function(request, response){
             console.log(params)
             
             // Build query
-            q = "SELECT USERNAME FROM QGJ93840.USER WHERE USER_ID = " + params['id'] +";";
+            q = "SELECT USERNAME FROM USER WHERE USER_ID = " + params['id'] +";";
 
             console.log(q);
 
@@ -306,8 +306,8 @@ app.post('/newRequest', function(request, response){
             console.log(params)
             
             // Build queries
-            request_query = "INSERT INTO QGJ93840.REQUESTS VALUES"
-            device_query =  "UPDATE QGJ93840.DEVICES SET " + '"device_state"' + " = 'Requested' WHERE DEVICE_ID IN ("
+            request_query = "INSERT INTO REQUESTS VALUES"
+            device_query =  "UPDATE DEVICES SET " + '"device_state"' + " = 'Requested' WHERE DEVICE_ID IN ("
             for (let i = 0; i < params.length-1; i++) {
                 var request_query = 
                         request_query + "(DEFAULT, " + params[i]['user_id'] + "," +
@@ -368,7 +368,7 @@ app.post('/checkDeviceAvailability', function(request, response){
             console.log(params)
             
             // Build query
-            q = 'SELECT "DEVICE_ID", "serial_number", "device_state" FROM QGJ93840.DEVICES WHERE "DEVICE_ID" IN ('
+            q = 'SELECT "DEVICE_ID", "serial_number", "device_state" FROM DEVICES WHERE "DEVICE_ID" IN ('
             for (let i = 0; i < params.length-1; i++) {
                 var q = q + params[i]['device_id'] + ",";
             }
@@ -441,14 +441,14 @@ app.post('/checkDeviceAvailability', function(request, response){
             console.log(err)
             return response.json({success:-1, message:err});
         } else {
-            conn.query("SELECT * FROM QGJ93840.DEVICES WHERE DEVICE_ID = "+ params["deviceID"] + ";", function (err, data) {
+            conn.query("SELECT * FROM DEVICES WHERE DEVICE_ID = "+ params["deviceID"] + ";", function (err, data) {
                 if (err){
                 console.log(err);
                 return response.json({success:-2, message:err});
             }
             else{
                 conn.close(function () {
-                    console.log("Using query: SELECT * FROM QGJ93840.DEVICES WHERE DEVICE_ID = "+ params["deviceID"] + ";")
+                    console.log("Using query: SELECT * FROM DEVICES WHERE DEVICE_ID = "+ params["deviceID"] + ";")
                     console.log('done');
                     // console.log(data)
                     return response.json({success:1, message:'Data Received!', data:data});
@@ -473,14 +473,14 @@ app.post('/getRequests', function(request, response){
             console.log(err)
             return response.json({success:-1, message:err});
         } else {
-            conn.query('SELECT REQUEST_ID, USERNAME, "device_type", "brand", "model", "serial_number", "device_state", "conditions_accepted", "in_campus", "Security_Auth", "last_admission_date", "last_exit_date", DATE as REQUEST_DATE,  RETURN_DATE, DEVICE_ID, USER_ID, STATUS FROM QGJ93840.REQUESTS FULL INNER JOIN QGJ93840.DEVICES USING (DEVICE_ID) JOIN QGJ93840.USER USING (USER_ID) WHERE STATUS ='+ "'" + params["STATUS"] + "' ORDER BY REQUEST_DATE LIMIT " + offset + ", " + limit, function (err, data) {
+            conn.query('SELECT REQUEST_ID, USERNAME, "device_type", "brand", "model", "serial_number", "device_state", "conditions_accepted", "in_campus", "Security_Auth", "last_admission_date", "last_exit_date", DATE as REQUEST_DATE,  RETURN_DATE, DEVICE_ID, USER_ID, STATUS FROM REQUESTS FULL INNER JOIN DEVICES USING (DEVICE_ID) JOIN USER USING (USER_ID) WHERE STATUS ='+ "'" + params["STATUS"] + "' ORDER BY REQUEST_DATE LIMIT " + offset + ", " + limit, function (err, data) {
                 if (err){
                 console.log(err);
                 return response.json({success:-2, message:err});
             }
             else{
                 conn.close(function () {
-                    console.log('Using query: SELECT REQUEST_ID, USERNAME, "device_type", "brand", "model", "serial_number", "device_state", "conditions_accepted", "in_campus", "Security_Auth", "last_admission_date", "last_exit_date", DATE as REQUEST_DATE,  RETURN_DATE, DEVICE_ID, USER_ID, STATUS FROM QGJ93840.REQUESTS FULL INNER JOIN QGJ93840.DEVICES USING (DEVICE_ID) JOIN QGJ93840.USER USING (USER_ID) WHERE STATUS ='+ "'" + params["STATUS"] + "' ORDER BY REQUEST_DATE LIMIT "+ offset + ", " + limit)
+                    console.log('Using query: SELECT REQUEST_ID, USERNAME, "device_type", "brand", "model", "serial_number", "device_state", "conditions_accepted", "in_campus", "Security_Auth", "last_admission_date", "last_exit_date", DATE as REQUEST_DATE,  RETURN_DATE, DEVICE_ID, USER_ID, STATUS FROM REQUESTS FULL INNER JOIN DEVICES USING (DEVICE_ID) JOIN USER USING (USER_ID) WHERE STATUS ='+ "'" + params["STATUS"] + "' ORDER BY REQUEST_DATE LIMIT "+ offset + ", " + limit)
                     console.log('done');
                     return response.json({success:1, message:'Data Received!', data:data});
                 });
@@ -500,7 +500,7 @@ app.post('/countRequests', function(request, response){
             console.log(err)
             return response.json({success:-1, message:err});
         } else {
-            conn.query("SELECT COUNT(*) FROM QGJ93840.REQUESTS WHERE STATUS = '"+ params["STATUS"]+"'", function (err, data) {
+            conn.query("SELECT COUNT(*) FROM REQUESTS WHERE STATUS = '"+ params["STATUS"]+"'", function (err, data) {
                 if (err){
                 console.log(err);
                 return response.json({success:-2, message:err});
@@ -528,8 +528,8 @@ app.post('/acceptRequest', function(request, response){
             console.log(params)
             
             // Build queries
-            change_accepted_Con =  'UPDATE QGJ93840.DEVICES SET "conditions_accepted" = 1 WHERE DEVICE_ID = ' + params['device_id']
-            update_REQ_status =  "UPDATE QGJ93840.REQUESTS SET STATUS = 'Accepted' WHERE REQUEST_ID = " + params['request_id']
+            change_accepted_Con =  'UPDATE DEVICES SET "conditions_accepted" = 1 WHERE DEVICE_ID = ' + params['device_id']
+            update_REQ_status =  "UPDATE REQUESTS SET STATUS = 'Accepted' WHERE REQUEST_ID = " + params['request_id']
 
 
             // Create device requests
@@ -573,8 +573,8 @@ app.post('/rejectRequest', function(request, response){
             console.log(params)
             
             // Build queries
-            change_device_State =  'UPDATE QGJ93840.DEVICES SET "device_state" = '+"'Available'"+' WHERE DEVICE_ID = ' + params['device_id']
-            update_REQ_status =  "UPDATE QGJ93840.REQUESTS SET STATUS = 'Denied' WHERE REQUEST_ID = " + params['request_id']
+            change_device_State =  'UPDATE DEVICES SET "device_state" = '+"'Available'"+' WHERE DEVICE_ID = ' + params['device_id']
+            update_REQ_status =  "UPDATE REQUESTS SET STATUS = 'Denied' WHERE REQUEST_ID = " + params['request_id']
 
 
             // Create device requests
@@ -614,7 +614,7 @@ app.post('/newUser', function(request, response){
             return response.json({success:-1, message:err});
         } else {
             var params = request.body['user_params']
-            var q = "INSERT INTO QGJ93840.USER" +
+            var q = "INSERT INTO USER" +
                     " VALUES (Default, '"+params['username']+"', '"+params['password']+"', "+
                     params['role']+")";
             console.log(q);
@@ -646,15 +646,15 @@ app.post('/getUserRequests', function(request, response){
             console.log(err)
             return response.json({success:-1, message:err});
         } else {
-            conn.query('SELECT REQUEST_ID, "device_type", "brand", "model", "serial_number", "device_state", "conditions_accepted", "in_campus", "Security_Auth", "last_admission_date", "last_exit_date", DATE as REQUEST_DATE,  RETURN_DATE, DEVICE_ID, STATUS FROM QGJ93840.REQUESTS FULL INNER JOIN QGJ93840.DEVICES USING (DEVICE_ID) WHERE STATUS = '+"'Accepted'"+ 'AND USER_ID ='+  params["userID"], function (err, data) {
-            // conn.query("SELECT * FROM QGJ93840.REQUESTS WHERE STATUS = 'Accepted' AND USER_ID = "+ params["userID"] + ";", function (err, data) {
+            conn.query('SELECT REQUEST_ID, "device_type", "brand", "model", "serial_number", "device_state", "conditions_accepted", "in_campus", "Security_Auth", "last_admission_date", "last_exit_date", DATE as REQUEST_DATE,  RETURN_DATE, DEVICE_ID, STATUS FROM REQUESTS FULL INNER JOIN DEVICES USING (DEVICE_ID) WHERE STATUS = '+"'Accepted'"+ 'AND USER_ID ='+  params["userID"], function (err, data) {
+            // conn.query("SELECT * FROM REQUESTS WHERE STATUS = 'Accepted' AND USER_ID = "+ params["userID"] + ";", function (err, data) {
                 if (err){
                 console.log(err);
                 return response.json({success:-2, message:err});
             }
             else{
                 conn.close(function () {
-                    console.log('Using query: SELECT REQUEST_ID, "device_type", "brand", "model", "serial_number", "device_state", "conditions_accepted", "in_campus", "Security_Auth", "last_admission_date", "last_exit_date", DATE as REQUEST_DATE,  RETURN_DATE, DEVICE_ID, STATUS FROM QGJ93840.REQUESTS FULL INNER JOIN QGJ93840.DEVICES USING (DEVICE_ID) WHERE STATUS = '+"'Accepted'"+ 'AND USER_ID ='+  params["userID"])
+                    console.log('Using query: SELECT REQUEST_ID, "device_type", "brand", "model", "serial_number", "device_state", "conditions_accepted", "in_campus", "Security_Auth", "last_admission_date", "last_exit_date", DATE as REQUEST_DATE,  RETURN_DATE, DEVICE_ID, STATUS FROM REQUESTS FULL INNER JOIN DEVICES USING (DEVICE_ID) WHERE STATUS = '+"'Accepted'"+ 'AND USER_ID ='+  params["userID"])
                     console.log('done');
                     // console.log(data)
                     return response.json({success:1, message:'Data Received!', data:data});
@@ -674,11 +674,25 @@ app.post('/editUserInfo', function(request, response){
             return response.json({success:-1, message:err});
         } else {
             var params = request.body['user_params']
-            if(params['column'] == "USERNAME" || params['column'] == "PASSWORD"){
-                var q = "UPDATE QGJ93840.USER SET "+params['column']+" = '"+params['change']+"' WHERE USER_ID = "+params['userID'];
-            }else if(params['column'] == "ROLE"){
-                var q = "UPDATE QGJ93840.USER SET "+params['column']+" = "+params['change']+" WHERE USER_ID = "+params['userID'];
+            var change = params['change']
+            if (params['column'] == "PASSWORD") {
+                if (change.length > 0) {
+                    // generate salt to hash password
+                    const salt = await bcrypt.genSalt(10);
+                    // generate hashed password
+                    const hashed_pass = await bcrypt.hash(change, salt);
+                    change = "'" + hashed_pass + "'"
+                }
+                else {
+                    return response.json({success:-2, message:"Passwords must not be empty"});
+                }
             }
+            else if(params['column'] == "USERNAME"){
+                change = "'" + change + "'"
+            }
+            var q = "UPDATE USER SET " + params['column'] + " = " + change +
+                    " WHERE USER_ID = " + params['userID'];
+
             console.log(q);
             conn.query(q, function (err, data) {
             if (err){
@@ -706,7 +720,7 @@ app.get('/countDevicesPanel', function(request, response){
             console.log(err)
             return response.json({success:-1, message:err});
         } else {
-            conn.query('SELECT * FROM (SELECT COUNT (*) as devicesNo FROM QGJ93840.DEVICES), (SELECT COUNT(*) as devicesIn FROM QGJ93840.DEVICES WHERE "in_campus" = true), (SELECT COUNT(*) as devicesOut FROM QGJ93840.DEVICES WHERE "in_campus" = false);', function (err, data) {
+            conn.query('SELECT * FROM (SELECT COUNT (*) as devicesNo FROM DEVICES), (SELECT COUNT(*) as devicesIn FROM DEVICES WHERE "in_campus" = true), (SELECT COUNT(*) as devicesOut FROM DEVICES WHERE "in_campus" = false);', function (err, data) {
                 if (err){
                 console.log(err);
                 return response.json({success:-2, message:err});
@@ -733,7 +747,7 @@ app.post('/countPanelOut', function(request, response){
             return response.json({success:-1, message:err});
         } else {
             var params = request.body['days']
-            conn.query('SELECT COUNT(*) FROM QGJ93840.DEVICES WHERE "last_exit_date" BETWEEN CURRENT_DATE-'+params+' AND CURRENT_DATE+1', function (err, data) {
+            conn.query('SELECT COUNT(*) FROM DEVICES WHERE "last_exit_date" BETWEEN CURRENT_DATE-'+params+' AND CURRENT_DATE+1', function (err, data) {
                 if (err){
                 console.log(err);
                 return response.json({success:-2, message:err});
@@ -760,7 +774,7 @@ app.post('/countPanelIn', function(request, response){
             return response.json({success:-1, message:err});
         } else {
             var params = request.body['days']
-            conn.query('SELECT COUNT(*) FROM QGJ93840.DEVICES WHERE "last_admission_date" BETWEEN CURRENT_DATE-'+params+' AND CURRENT_DATE+1', function (err, data) {
+            conn.query('SELECT COUNT(*) FROM DEVICES WHERE "last_admission_date" BETWEEN CURRENT_DATE-'+params+' AND CURRENT_DATE+1', function (err, data) {
                 if (err){
                 console.log(err);
                 return response.json({success:-2, message:err});
@@ -788,7 +802,7 @@ app.post('/registerExit', function(request, response){
             console.log(params)
             
             // Build queries
-            exitTime =  'UPDATE QGJ93840.DEVICES SET "Security_Auth" = 1, "in_campus" = 0, "last_exit_date" = CURRENT_TIMESTAMP, "device_state" = '+"'Checked Out'"+' WHERE DEVICE_ID = ' + params['device_id']
+            exitTime =  'UPDATE DEVICES SET "Security_Auth" = 1, "in_campus" = 0, "last_exit_date" = CURRENT_TIMESTAMP, "device_state" = '+"'Checked Out'"+' WHERE DEVICE_ID = ' + params['device_id']
             conn.query(exitTime, function (err, data) {
                 if (err){
                     console.log(err);
@@ -820,8 +834,8 @@ app.post('/registerReturn', function(request, response){
             console.log(params)
             
             // Build queries
-            returnTime =  'UPDATE QGJ93840.DEVICES SET "conditions_accepted" = 0, "Security_Auth" = 0, "in_campus" = 1, "last_admission_date" = CURRENT_TIMESTAMP, "device_state" = '+"'Available'"+' WHERE DEVICE_ID = ' + params['device_id']
-            update_REQ_status =  "UPDATE QGJ93840.REQUESTS SET STATUS = 'Finished' WHERE REQUEST_ID = (SELECT REQUEST_ID FROM QGJ93840.REQUESTS WHERE DEVICE_ID = "+params['device_id']+" AND STATUS = 'Accepted')"
+            returnTime =  'UPDATE DEVICES SET "conditions_accepted" = 0, "Security_Auth" = 0, "in_campus" = 1, "last_admission_date" = CURRENT_TIMESTAMP, "device_state" = '+"'Available'"+' WHERE DEVICE_ID = ' + params['device_id']
+            update_REQ_status =  "UPDATE REQUESTS SET STATUS = 'Finished' WHERE REQUEST_ID = (SELECT REQUEST_ID FROM REQUESTS WHERE DEVICE_ID = "+params['device_id']+" AND STATUS = 'Accepted')"
 
             conn.query(returnTime, function (err, data) {
                 if (err){
